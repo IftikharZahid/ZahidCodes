@@ -1,44 +1,74 @@
-# Iftikhar Zahid | Portfolio Website
+# ZahidCodes.tech — Dynamic Portfolio CMS
 
-Welcome to my personal portfolio website repository! This project showcases my skills, experience, and projects as a Senior Mobile & Web Developer.
+A full-stack portfolio and project showcase:
+- Public portfolio with search, category filters, project detail pages and responsive layout.
+- Protected admin dashboard with login, project create/edit/delete, image uploads, technology tags and featured projects.
+- Basic analytics: portfolio visits, project views and click-throughs.
+- MongoDB persistence, Express API, JWT authentication and password hashing.
 
-**Live Site:** [ZahidCodes.github.io](https://ZahidCodes.github.io)
+## Requirements
+- Node.js 18.18+ (Node 20 LTS recommended)
+- MongoDB Atlas database or local MongoDB
 
-## 👨‍💻 About Me
+## 1. Configure the backend
+Copy `server/.env.example` to `server/.env` and set:
+- `MONGODB_URI`
+- `JWT_SECRET` (use a long random secret)
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD` (strong password; change before deployment)
+- `CLIENT_ORIGIN` (for local development use `http://localhost:5173`)
 
-I am a passionate **Mobile and Web App Developer** with over 4 years of experience. I specialize in building scalable, high-performance applications using **React**, **React Native**, **Firebase**, and modern JavaScript technologies.
+The first time the API starts, it creates the admin account from `ADMIN_EMAIL` and `ADMIN_PASSWORD` if that account does not exist. Do not expose these values or commit `.env`.
 
-*   **Role:** Senior Mobile & Web Developer
-*   **Focus:** Cross-platform mobile apps, responsive web dashboards, and backend integration.
+## 2. Install and run
+From the project root:
 
-## 🚀 Tech Stack
+```bash
+npm install
+npm install --prefix server
+npm install --prefix client
+npm run dev
+```
 
-*   **Frontend:** React, React Native, HTML5, CSS3, JavaScript (ES6+), TypeScript
-*   **Styling:** Tailwind CSS, Vanilla CSS
-*   **State Management:** Redux Toolkit
-*   **Backend & DB:** Node.js, Firebase, MongoDB
-*   **Tools:** Python, Git, Expo
+Frontend: http://localhost:5173  
+Backend health: http://localhost:5000/api/health  
+Admin login: http://localhost:5173/admin/login
 
-## 📂 Featured Projects
+## 3. Production build
+```bash
+npm run build
+npm start
+```
+For production, deploy the client build to a static host and the API to a Node host, or configure your hosting provider to serve `client/dist`. Set `VITE_API_URL` to the deployed API base URL when building the client. Set `CLIENT_ORIGIN` to the deployed frontend origin.
 
-Here are some of the key projects featured in this portfolio:
+## Admin usage
+1. Open `/admin/login`.
+2. Sign in with the credentials configured in `server/.env`.
+3. Add a project with title, summary, description, category, technologies, links and optional cover image.
+4. Toggle Featured to show it in the featured area.
+5. Use the dashboard metrics to monitor visits and project views.
 
-*   **PGC College Website:** A full-stack College Management System with a modern glassmorphism UI.
-*   **The Seeks Academy:** An educational platform built with TypeScript for interactive courses.
-*   **DigitalBook App:** A mobile app for digital content consumption (Expo/React Native).
-*   **Foodie Restaurant App:** A cross-platform food delivery app with cart and auth functionality.
-*   **AI Background Remover:** A Python-based computer vision tool for image processing.
-*   **UStore:** A modern e-commerce application built with TypeScript.
-*   **Social Media Scraper:** automation tools for data extraction.
+## Add a project manually
+Use the admin dashboard. The public projects are loaded dynamically from MongoDB; no source-code edit is needed for normal content updates.
 
-## 📬 Contact
+## Important production checklist
+- Replace the example email/social links in `client/src/App.jsx`.
+- Set a strong unique `JWT_SECRET` and admin password.
+- Use HTTPS for both frontend and API.
+- Restrict MongoDB network access to your server.
+- Configure persistent storage for uploaded images, or replace local Multer storage with S3/Cloudinary for serverless/multi-instance deployments.
+- Back up MongoDB and uploaded media.
+- Add your real GitHub, LinkedIn and contact details before publishing.
 
-Feel free to reach out for collaborations or opportunities!
+## API overview
+- `GET /api/projects` — public project list
+- `GET /api/projects/:slug` — project detail (increments view)
+- `POST /api/analytics/visit` — record public visit
+- `POST /api/analytics/click/:projectId` — record project link click
+- `POST /api/auth/login` — admin login
+- `GET /api/admin/dashboard` — protected metrics
+- `POST /api/admin/projects` — protected create (multipart form)
+- `PUT /api/admin/projects/:id` — protected update (multipart form)
+- `DELETE /api/admin/projects/:id` — protected delete
 
-*   **Email:** [xahidcodes@gmail.com](mailto:xahidcodes@gmail.com)
-*   **LinkedIn:** [Iftikhar Zahid](https://linkedin.com/in/IftikharZahid)
-*   **GitHub:** [IftikharZahid](https://github.com/IftikharZahid)
-*   **WhatsApp:** [+92 300 7971374](https://wa.me/923007971374)
-
----
-© 2026 ZahidCodes | Built with ❤️ by Iftikhar Zahid
+This is a complete starter product, but production deployment still requires environment configuration and hosting setup.
