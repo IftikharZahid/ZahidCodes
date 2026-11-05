@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { Routes, Route, Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowUpRight,
   Github,
@@ -83,7 +83,16 @@ function Header() {
 }
 function ProjectCard({ p, onOpen }) {
   return (
-    <article className="project-card" onClick={() => onOpen(p)}>
+    <article
+      className="project-card"
+      onClick={() => onOpen(p)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onOpen(p);
+      }}
+      tabIndex={0}
+      role="link"
+      aria-label={`View ${p.title} project details`}
+    >
       <div className="project-image">
         <img
           src={p.image || "/assets/projects/web-platform.svg"}
@@ -157,12 +166,158 @@ function Detail({ project, onClose }) {
     </div>
   );
 }
+function slugify(value = "") {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function youtubeEmbedUrl(value = "") {
+  try {
+    const url = new URL(value);
+    if (!["www.youtube.com", "youtube.com", "youtu.be", "m.youtube.com"].includes(url.hostname)) {
+      return "";
+    }
+    if (url.hostname === "youtu.be") return `https://www.youtube.com/embed/${url.pathname.slice(1)}`;
+    if (url.pathname.startsWith("/embed/")) return url.toString();
+    const id = url.searchParams.get("v");
+    return id ? `https://www.youtube.com/embed/${id}` : "";
+  } catch {
+    return "";
+  }
+}
+
+function ProjectDetail() {
+  const { slug } = useParams();
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let active = true;
+    axios
+      .get(`${API}/projects/${slug}`)
+      .then((r) => active && setProject(r.data))
+      .catch(() => {
+        const fallback = seedProjects.find(
+          (item) => item.slug === slug || slugify(item.title) === slug,
+        );
+        if (active) setProject(fallback || null);
+      })
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [slug]);
+
+  if (loading) {
+    return <div className="project-detail-state">Loading project details…</div>;
+  }
+  if (!project) {
+    return (
+      <div className="project-detail-state">
+        <p className="eyebrow">PROJECT NOT FOUND</p>
+        <h1>That project is unavailable.</h1>
+        <button className="button primary" onClick={() => navigate("/")}>
+          Back to projects <ArrowUpRight size={16} />
+        </button>
+      </div>
+    );
+  }
+
+  const video = youtubeEmbedUrl(project.videoUrl);
+  const features = Array.isArray(project.features)
+    ? project.features
+    : (project.features || "").split(",").map((item) => item.trim()).filter(Boolean);
+
+  return (
+    <div className="project-detail-page">
+      <Header />
+      <main className="project-detail">
+        <button className="back-link project-back" onClick={() => navigate("/")}>
+          <ChevronRight size={16} className="back-icon" /> Back to projects
+        </button>
+        <div className="project-detail-hero">
+          <div className="project-detail-copy">
+            <p className="eyebrow">{project.category}</p>
+            <h1>{project.title}</h1>
+            <p className="project-detail-summary">{project.summary}</p>
+            <div className="detail-actions">
+              {project.liveUrl && (
+                <a className="button primary" href={project.liveUrl} target="_blank" rel="noreferrer">
+                  Live preview <ExternalLink size={16} />
+                </a>
+              )}
+              {project.githubUrl && (
+                <a className="button ghost" href={project.githubUrl} target="_blank" rel="noreferrer">
+                  <Github size={16} /> Source code
+                </a>
+              )}
+            </div>
+          </div>
+          <img
+            className="project-detail-image"
+            src={project.image || "/assets/projects/web-platform.svg"}
+            alt={`${project.title} preview`}
+            onError={(e) => (e.currentTarget.src = "/assets/projects/web-platform.svg")}
+          />
+        </div>
+        <div className="project-detail-layout">
+          <article className="project-detail-main">
+            <section className="detail-section">
+              <p className="eyebrow">ABOUT THE PROJECT</p>
+              <h2>Built to make an idea useful.</h2>
+              <p>{project.description || project.summary}</p>
+            </section>
+            {features.length > 0 && (
+              <section className="detail-section">
+                <p className="eyebrow">KEY FEATURES</p>
+                <ul className="feature-list">
+                  {features.map((feature) => <li key={feature}>{feature}</li>)}
+                </ul>
+              </section>
+            )}
+            {video && (
+              <section className="detail-section">
+                <p className="eyebrow">PROJECT WALKTHROUGH</p>
+                <div className="video-frame">
+                  <iframe
+                    src={video}
+                    title={`${project.title} video walkthrough`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </section>
+            )}
+          </article>
+          <aside className="project-facts">
+            <div>
+              <span>Category</span>
+              <strong>{project.category || "—"}</strong>
+            </div>
+            <div>
+              <span>Technology</span>
+              <div className="chips">
+                {(project.technologies || []).map((technology) => <span key={technology}>{technology}</span>)}
+              </div>
+            </div>
+            {project.role && <div><span>Role</span><strong>{project.role}</strong></div>}
+            {project.year && <div><span>Year</span><strong>{project.year}</strong></div>}
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+}
 function Home() {
   const [projects, setProjects] = useState(seedProjects),
     [query, setQuery] = useState(""),
     [category, setCategory] = useState("All"),
-    [selected, setSelected] = useState(null),
     [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   useEffect(() => {
     axios
       .get(`${API}/projects`)
@@ -307,7 +462,7 @@ function Home() {
               <ProjectCard
                 key={p._id || p.id || p.slug}
                 p={p}
-                onOpen={setSelected}
+                onOpen={(project) => navigate(`/projects/${project.slug || slugify(project.title)}`)}
               />
             ))}
           </div>
@@ -508,7 +663,7 @@ function Home() {
           </a>
         </div>
       </footer>
-      <Detail project={selected} onClose={() => setSelected(null)} />
+
       <AIAssistant />
     </>
   );
@@ -673,7 +828,7 @@ function AIAssistant() {
       setLoading(false);
     }
   };
-
+  
   const clearHistory = () => {
     setMessages([
       {
@@ -1279,6 +1434,44 @@ function Admin() {
                 </label>
 
                 <label>
+                  <span>YouTube video URL</span>
+                  <input
+                    name="videoUrl"
+                    defaultValue={form.videoUrl || ""}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                  />
+                </label>
+
+                <label>
+                  <span>Key features (comma separated)</span>
+                  <textarea
+                    name="features"
+                    rows={2}
+                    defaultValue={(form.features || []).join(", ")}
+                    placeholder="Attendance, reports, notifications"
+                  />
+                </label>
+
+                <div className="form-row-2">
+                  <label>
+                    <span>Your role</span>
+                    <input
+                      name="role"
+                      defaultValue={form.role || ""}
+                      placeholder="Product design & development"
+                    />
+                  </label>
+                  <label>
+                    <span>Project year</span>
+                    <input
+                      name="year"
+                      defaultValue={form.year || ""}
+                      placeholder="2025"
+                    />
+                  </label>
+                </div>
+
+                <label>
                   <span>Technologies (comma separated)</span>
                   <input
                     name="technologies"
@@ -1368,6 +1561,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/projects/:slug" element={<ProjectDetail />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="*" element={<Home />} />

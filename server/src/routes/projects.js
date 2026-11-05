@@ -14,9 +14,19 @@ router.get("/",async(req,res)=>{
  const items=await Project.find(filter).sort({featured:-1,createdAt:-1});
  res.json(items);
 });
+router.get("/:slug",async(req,res)=>{
+ try{
+  const project=await Project.findOne({slug:req.params.slug,status:"published"});
+  if(!project)return res.status(404).json({message:"Project not found"});
+  res.json(project);
+ }catch(e){res.status(400).json({message:e.message});}
+});
 router.post("/",auth,upload.single("image"),async(req,res)=>{
  try{
-  const data={...req.body,technologies:(req.body.technologies||"").split(",").map(x=>x.trim()).filter(Boolean)};
+  const data={...req.body,
+   technologies:(req.body.technologies||"").split(",").map(x=>x.trim()).filter(Boolean),
+   features:(req.body.features||"").split(",").map(x=>x.trim()).filter(Boolean)
+  };
   if(req.file)data.image=`/uploads/${req.file.filename}`;
   data.slug=(data.slug||data.title).toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const project=await Project.create(data);res.status(201).json(project);
@@ -26,6 +36,7 @@ router.put("/:id",auth,upload.single("image"),async(req,res)=>{
  try{
   const data={...req.body};
   if(typeof data.technologies==="string")data.technologies=data.technologies.split(",").map(x=>x.trim()).filter(Boolean);
+  if(typeof data.features==="string")data.features=data.features.split(",").map(x=>x.trim()).filter(Boolean);
   if(req.file)data.image=`/uploads/${req.file.filename}`;
   const project=await Project.findByIdAndUpdate(req.params.id,data,{new:true,runValidators:true});
   if(!project)return res.status(404).json({message:"Project not found"});

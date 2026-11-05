@@ -1047,6 +1047,187 @@ button, input, textarea {
 }
 
 /* ==========================================================================
+   PROJECT DETAIL PAGE
+   ========================================================================== */
+.project-detail-page {
+  min-height: 100vh;
+}
+
+.project-detail {
+  max-width: var(--max-w);
+  margin: auto;
+  padding: 34px 24px 80px;
+}
+
+.project-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 28px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.project-back .back-icon {
+  transform: rotate(180deg);
+}
+
+.project-detail-hero {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 42px;
+  align-items: center;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--line);
+}
+
+.project-detail-copy h1 {
+  font: 700 clamp(34px, 5vw, 58px) / 1.08 'Space Grotesk', sans-serif;
+  letter-spacing: -2px;
+  margin: 0 0 16px;
+  color: #fff;
+}
+
+.project-detail-summary {
+  max-width: 520px;
+  color: #aab7cd;
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+
+.project-detail-image {
+  width: 100%;
+  max-height: 430px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 22px 65px rgba(0, 0, 0, 0.35);
+}
+
+.project-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 54px;
+  padding-top: 48px;
+}
+
+.detail-section {
+  margin-bottom: 44px;
+}
+
+.detail-section h2 {
+  font: 700 28px 'Space Grotesk', sans-serif;
+  margin: 0 0 14px;
+  color: #fff;
+}
+
+.detail-section > p:not(.eyebrow) {
+  color: #aab7cd;
+  font-size: 15px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.feature-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.feature-list li {
+  padding: 15px 16px 15px 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: #dce8f8;
+  background: #0e1728;
+  position: relative;
+}
+
+.feature-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 16px;
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.project-facts {
+  align-self: start;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #0e1728;
+  padding: 20px;
+}
+
+.project-facts > div {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+}
+
+.project-facts > div:first-child {
+  padding-top: 0;
+}
+
+.project-facts > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.project-facts span {
+  color: #8297b6;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.project-facts strong {
+  color: #edf4ff;
+  font-size: 14px;
+}
+
+.project-facts .chips {
+  margin: 0;
+}
+
+.video-frame {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #050912;
+}
+
+.video-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.project-detail-state {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+
+.project-detail-state h1 {
+  font: 700 32px 'Space Grotesk', sans-serif;
+  margin: 0 0 14px;
+}
+
+/* ==========================================================================
    HOMESCREEN RESPONSIVE MEDIA QUERIES
    ========================================================================== */
 
@@ -1122,6 +1303,29 @@ button, input, textarea {
     align-items: stretch;
     border-bottom: 1px solid var(--line);
     gap: 14px;
+  }
+  .project-detail {
+    padding: 24px 16px 56px;
+  }
+  .project-detail-hero,
+  .project-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .project-detail-hero {
+    padding-bottom: 32px;
+  }
+  .project-detail-copy h1 {
+    font-size: 38px;
+  }
+  .project-detail-image {
+    max-height: 280px;
+  }
+  .project-detail-layout {
+    padding-top: 32px;
+  }
+  .feature-list {
+    grid-template-columns: 1fr;
   }
   .navlinks.show {
     display: flex;
@@ -2782,4 +2986,3 @@ button, input, textarea {
     border-radius: 10px;
   }
 }
-
