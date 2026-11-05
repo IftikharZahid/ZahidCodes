@@ -33,10 +33,17 @@ import {
   MessageSquare,
   Moon,
   Sun,
+  PlayCircle,
 } from "lucide-react";
 import { seedProjects } from "./data/seedProjects";
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_ORIGIN = API.replace(/\/api\/?$/, "");
 const asset = (p) => p;
+const mediaUrl = (value, fallback = "/assets/projects/web-platform.svg") => {
+  if (!value) return fallback;
+  if (/^(https?:|data:|blob:)/i.test(value)) return value;
+  return value.startsWith("/uploads/") ? `${API_ORIGIN}${value}` : value;
+};
 
 function WhatsAppIcon({ size = 18, className = "" }) {
   return (
@@ -56,7 +63,7 @@ function Header() {
   const [open, setOpen] = useState(false);
   const [lightMode, setLightMode] = useState(() => {
     const saved = localStorage.getItem("zc-theme");
-    return saved ? saved === "light" : window.matchMedia("(prefers-color-scheme: light)").matches;
+    return saved === "light";
   });
 
   useEffect(() => {
@@ -117,7 +124,7 @@ function ProjectCard({ p, onOpen }) {
     >
       <div className="project-image">
         <img
-          src={p.image || "/assets/projects/web-platform.svg"}
+          src={mediaUrl(p.image)}
           onError={(e) =>
             (e.currentTarget.src = "/assets/projects/web-platform.svg")
           }
@@ -138,6 +145,11 @@ function ProjectCard({ p, onOpen }) {
         </div>
         <h3>{p.title}</h3>
         <p>{p.summary}</p>
+        {(p.videoUrl || p.youtubeUrl) && (
+          <span className="project-video-badge">
+            <PlayCircle size={12} /> Video walkthrough
+          </span>
+        )}
         <button className="text-link">
           Explore project <ArrowUpRight size={15} />
         </button>
@@ -153,7 +165,7 @@ function Detail({ project, onClose }) {
         <button className="close" onClick={onClose}>
           <X />
         </button>
-        <img className="detail-image" src={project.image} />
+        <img className="detail-image" src={mediaUrl(project.image)} />
         <div className="detail-content">
           <span className="eyebrow">{project.category}</span>
           <h2>{project.title}</h2>
@@ -198,14 +210,23 @@ function slugify(value = "") {
 
 function youtubeEmbedUrl(value = "") {
   try {
-    const url = new URL(value);
-    if (!["www.youtube.com", "youtube.com", "youtu.be", "m.youtube.com"].includes(url.hostname)) {
+    const raw = value.trim();
+    const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    const hostname = url.hostname.toLowerCase().replace(/^www\./, "");
+    if (!["youtube.com", "youtu.be", "m.youtube.com"].includes(hostname)) {
       return "";
     }
-    if (url.hostname === "youtu.be") return `https://www.youtube.com/embed/${url.pathname.slice(1)}`;
-    if (url.pathname.startsWith("/embed/")) return url.toString();
-    const id = url.searchParams.get("v");
-    return id ? `https://www.youtube.com/embed/${id}` : "";
+    const id =
+      hostname === "youtu.be"
+        ? url.pathname.slice(1).split("/")[0]
+        : url.pathname.startsWith("/embed/")
+          ? url.pathname.split("/")[2]
+          : /^\/(shorts|live)\//.test(url.pathname)
+            ? url.pathname.split("/")[2]
+            : url.searchParams.get("v");
+    return id && /^[\w-]{6,}$/.test(id)
+      ? `https://www.youtube.com/embed/${id}`
+      : "";
   } catch {
     return "";
   }
@@ -249,7 +270,7 @@ function ProjectDetail() {
     );
   }
 
-  const video = youtubeEmbedUrl(project.videoUrl);
+  const video = youtubeEmbedUrl(project.videoUrl || project.youtubeUrl);
   const features = Array.isArray(project.features)
     ? project.features
     : (project.features || "").split(",").map((item) => item.trim()).filter(Boolean);
@@ -281,7 +302,7 @@ function ProjectDetail() {
           </div>
           <img
             className="project-detail-image"
-            src={project.image || "/assets/projects/web-platform.svg"}
+            src={mediaUrl(project.image)}
             alt={`${project.title} preview`}
             onError={(e) => (e.currentTarget.src = "/assets/projects/web-platform.svg")}
           />
@@ -310,7 +331,7 @@ function ProjectDetail() {
                   </div>
                   <a
                     className="video-source-link"
-                    href={project.videoUrl}
+                    href={project.videoUrl || project.youtubeUrl}
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -451,6 +472,20 @@ function Home() {
               <span>
                 <b>Full-stack</b>
                 <small>Web · Mobile · AI</small>
+              </span>
+            </div>
+            <div className="floating-card impact-card">
+              <Sparkles />
+              <span>
+                <b>Product thinking</b>
+                <small>Ideas into outcomes</small>
+              </span>
+            </div>
+            <div className="floating-card delivery-card">
+              <CheckCircle2 />
+              <span>
+                <b>Reliable delivery</b>
+                <small>Built for real people</small>
               </span>
             </div>
           </div>
@@ -655,6 +690,7 @@ function Home() {
       </main>
       <footer className="footer">
         <Link to="/" className="footer-brand">
+          <img src="/assets/zahidcodes-logo.png" alt="" />
           Zahid<span>Codes</span>
         </Link>
         <span>
@@ -1304,7 +1340,7 @@ function Admin() {
                   <td>
                     <div className="table-project">
                       <img
-                        src={p.image || "/assets/projects/web-platform.svg"}
+                        src={mediaUrl(p.image)}
                         onError={(e) =>
                           (e.currentTarget.src =
                             "/assets/projects/web-platform.svg")
@@ -1370,7 +1406,7 @@ function Admin() {
               <div className="admin-card-head">
                 <img
                   className="admin-card-img"
-                  src={p.image || "/assets/projects/web-platform.svg"}
+                  src={mediaUrl(p.image)}
                   onError={(e) =>
                     (e.currentTarget.src = "/assets/projects/web-platform.svg")
                   }
@@ -1533,14 +1569,14 @@ function Admin() {
                   <label>
                     <span>Project image URL</span>
                     <input
-                      name="image"
+                      name="imageUrl"
                       defaultValue={form.image || ""}
                       placeholder="/assets/projects/web-platform.svg"
                     />
                   </label>
                   <label>
                     <span>Or upload image</span>
-                    <input name="image" type="file" accept="image/*" />
+                    <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" />
                   </label>
                 </div>
 
@@ -1607,6 +1643,11 @@ function Admin() {
   );
 }
 export default function App() {
+  useEffect(() => {
+    const saved = localStorage.getItem("zc-theme");
+    document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<Home />} />

@@ -28,6 +28,10 @@ router.post("/",auth,upload.single("image"),async(req,res)=>{
    features:(req.body.features||"").split(",").map(x=>x.trim()).filter(Boolean)
   };
   if(req.file)data.image=`/uploads/${req.file.filename}`;
+  else if(req.body.imageUrl)data.image=req.body.imageUrl;
+  delete data.imageUrl;
+  data.status=data.status==="draft"?"draft":"published";
+  data.featured=data.featured==="true" || data.featured==="on";
   data.slug=(data.slug||data.title).toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const project=await Project.create(data);res.status(201).json(project);
  }catch(e){res.status(400).json({message:e.message});}
@@ -38,6 +42,10 @@ router.put("/:id",auth,upload.single("image"),async(req,res)=>{
   if(typeof data.technologies==="string")data.technologies=data.technologies.split(",").map(x=>x.trim()).filter(Boolean);
   if(typeof data.features==="string")data.features=data.features.split(",").map(x=>x.trim()).filter(Boolean);
   if(req.file)data.image=`/uploads/${req.file.filename}`;
+  else if(req.body.imageUrl)data.image=req.body.imageUrl;
+  delete data.imageUrl;
+  if("status" in data)data.status=data.status==="draft"?"draft":"published";
+  if("featured" in data)data.featured=data.featured==="true" || data.featured==="on";
   const project=await Project.findByIdAndUpdate(req.params.id,data,{new:true,runValidators:true});
   if(!project)return res.status(404).json({message:"Project not found"});
   res.json(project);
