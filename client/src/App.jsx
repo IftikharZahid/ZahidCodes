@@ -31,6 +31,8 @@ import {
   Send,
   RotateCcw,
   MessageSquare,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { seedProjects } from "./data/seedProjects";
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -52,6 +54,16 @@ function WhatsAppIcon({ size = 18, className = "" }) {
 }
 function Header() {
   const [open, setOpen] = useState(false);
+  const [lightMode, setLightMode] = useState(() => {
+    const saved = localStorage.getItem("zc-theme");
+    return saved ? saved === "light" : window.matchMedia("(prefers-color-scheme: light)").matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = lightMode ? "light" : "dark";
+    localStorage.setItem("zc-theme", lightMode ? "light" : "dark");
+  }, [lightMode]);
+
   return (
     <header className="nav">
       <Link to="/" className="brand">
@@ -74,6 +86,16 @@ function Header() {
         <a href="#about" onClick={() => setOpen(false)}>
           About
         </a>
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={() => setLightMode((value) => !value)}
+          aria-label={lightMode ? "Switch to dark mode" : "Switch to light mode"}
+          title={lightMode ? "Switch to dark mode" : "Switch to light mode"}
+        >
+          {lightMode ? <Moon size={16} /> : <Sun size={16} />}
+          <span>{lightMode ? "Dark mode" : "Light mode"}</span>
+        </button>
         <a href="#contact" className="nav-cta" onClick={() => setOpen(false)}>
           Let's talk <ArrowUpRight size={16} />
         </a>
@@ -281,14 +303,35 @@ function ProjectDetail() {
             )}
             {video && (
               <section className="detail-section">
-                <p className="eyebrow">PROJECT WALKTHROUGH</p>
-                <div className="video-frame">
-                  <iframe
-                    src={video}
-                    title={`${project.title} video walkthrough`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                <div className="video-heading">
+                  <div>
+                    <p className="eyebrow">PROJECT WALKTHROUGH</p>
+                    <h2>See it in action.</h2>
+                  </div>
+                  <a
+                    className="video-source-link"
+                    href={project.videoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Watch on YouTube <ExternalLink size={14} />
+                  </a>
+                </div>
+                <div className="video-card">
+                  <div className="video-card-bar">
+                    <span className="video-status"><i /> Project video</span>
+                    <span className="video-brand">YouTube</span>
+                  </div>
+                  <div className="video-frame">
+                    <iframe
+                      src={`${video}?rel=0&modestbranding=1`}
+                      title={`${project.title} video walkthrough`}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  </div>
                 </div>
               </section>
             )}
@@ -1091,9 +1134,11 @@ function Admin() {
   async function load() {
     try {
       const r = await axios.get(`${API}/projects?admin=true`);
-      setItems(r.data);
+      const databaseProjects = Array.isArray(r.data) ? r.data : [];
+      setItems(databaseProjects.length ? databaseProjects : seedProjects);
     } catch {
       setItems(seedProjects);
+      setMessage("Showing showcase projects. Connect the API to manage saved projects.");
     }
     setLoading(false);
   }
@@ -1129,6 +1174,10 @@ function Admin() {
   }
 
   async function del(id) {
+    if (!id || String(id).startsWith("seed-")) {
+      setMessage("Showcase projects cannot be deleted until they are saved in the CMS.");
+      return;
+    }
     if (!confirm("Delete this project?")) return;
     try {
       await axios.delete(`${API}/projects/${id}`, { headers });

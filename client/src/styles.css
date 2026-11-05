@@ -23,6 +23,17 @@
   --line: rgba(174, 195, 230, 0.12);
   --gold: #f2bd55;
   --max-w: 1180px;
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f4f7fc;
+  --panel: #ffffff;
+  --panel-card: #ffffff;
+  --muted: #5b6b85;
+  --line: rgba(25, 52, 89, 0.14);
+  --cyan: #078fa4;
 }
 
 * {
@@ -38,6 +49,11 @@ body {
   background: radial-gradient(ellipse at 50% -10%, #172a4e 0%, transparent 45%), var(--bg);
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+:root[data-theme='light'] body {
+  color: #17243b;
+  background: radial-gradient(ellipse at 50% -10%, #dceeff 0%, transparent 48%), var(--bg);
 }
 
 a {
@@ -105,6 +121,74 @@ button, input, textarea {
 
 .navlinks a:hover {
   color: #ffffff;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #3c5275;
+  border-radius: 9px;
+  padding: 8px 11px;
+  background: transparent;
+  color: #dbe8fb;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.theme-toggle:hover {
+  border-color: var(--cyan);
+  background: rgba(59, 214, 232, 0.08);
+}
+
+:root[data-theme='light'] .navlinks {
+  color: #52627c;
+}
+
+:root[data-theme='light'] .navlinks a:hover,
+:root[data-theme='light'] .theme-toggle {
+  color: #17243b;
+}
+
+:root[data-theme='light'] .nav-cta {
+  color: #17243b !important;
+  border-color: #9eb0ca;
+}
+
+:root[data-theme='light'] .project-card,
+:root[data-theme='light'] .service,
+:root[data-theme='light'] .trust-strip,
+:root[data-theme='light'] .project-facts,
+:root[data-theme='light'] .feature-list li {
+  background: #ffffff;
+}
+
+:root[data-theme='light'] .project-info h3,
+:root[data-theme='light'] .section h2,
+:root[data-theme='light'] .about-section h2,
+:root[data-theme='light'] .contact-section h2,
+:root[data-theme='light'] .project-detail-copy h1,
+:root[data-theme='light'] .detail-section h2,
+:root[data-theme='light'] .project-detail-state h1 {
+  color: #17243b;
+}
+
+:root[data-theme='light'] .project-info p,
+:root[data-theme='light'] .section-note,
+:root[data-theme='light'] .hero-desc,
+:root[data-theme='light'] .detail-section > p:not(.eyebrow),
+:root[data-theme='light'] .project-detail-summary {
+  color: #5b6b85;
+}
+
+:root[data-theme='light'] .search-box {
+  background: #ffffff;
+}
+
+:root[data-theme='light'] .search-box input {
+  color: #17243b;
 }
 
 .nav-cta {
@@ -1201,8 +1285,8 @@ button, input, textarea {
 .video-frame {
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  border-radius: 14px;
-  border: 1px solid var(--line);
+  border-radius: 0 0 14px 14px;
+  border: 0;
   background: #050912;
 }
 
@@ -1210,6 +1294,89 @@ button, input, textarea {
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.video-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.video-heading .eyebrow {
+  margin-bottom: 8px;
+}
+
+.video-heading h2 {
+  margin-bottom: 0;
+}
+
+.video-source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.video-source-link:hover {
+  color: #65dce9;
+}
+
+.video-card {
+  overflow: hidden;
+  border: 1px solid rgba(108, 139, 182, 0.25);
+  border-radius: 15px;
+  background: #0a1220;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+}
+
+.video-card-bar {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  border-bottom: 1px solid rgba(174, 195, 230, 0.1);
+  color: #9aacc8;
+  font-size: 11px;
+}
+
+.video-status,
+.video-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.video-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #45e0a4;
+  box-shadow: 0 0 10px rgba(69, 224, 164, 0.65);
+}
+
+.video-brand {
+  color: #e2eafa;
+  font-weight: 700;
+}
+
+:root[data-theme='light'] .video-card {
+  background: #e8eef8;
+  border-color: rgba(25, 52, 89, 0.15);
+}
+
+:root[data-theme='light'] .video-card-bar {
+  color: #60718a;
+  border-color: rgba(25, 52, 89, 0.1);
+}
+
+:root[data-theme='light'] .video-brand {
+  color: #17243b;
 }
 
 .project-detail-state {
@@ -1332,6 +1499,14 @@ button, input, textarea {
   }
   .nav-cta {
     justify-content: center;
+  }
+  .theme-toggle {
+    justify-content: center;
+  }
+  .video-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
   }
   .hero {
     padding: 32px 16px 20px;
