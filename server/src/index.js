@@ -7,6 +7,7 @@ import dns from "dns";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import projectRoutes from "./routes/projects.js";
+import chatRoutes from "./routes/chat.js";
 
 // Fix for Windows DNS resolution with MongoDB SRV records
 try {
@@ -28,6 +29,7 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "ZahidCodes Portfolio API" }));
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/chat", chatRoutes);
 
 const port = process.env.PORT || 5000;
 
