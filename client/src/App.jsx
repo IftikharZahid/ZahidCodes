@@ -703,12 +703,14 @@ function Home() {
           </div>
           <div className="hero-visual">
             <div className="orbit orbit-one">
-              <span className="orbit-star star-cyan-1" />
-              <span className="orbit-star star-gold-1" />
+              <span className="orbit-dot dot-cyan" title="Cyan" />
+              <span className="orbit-dot dot-green" title="Green" />
+              <span className="orbit-dot dot-purple" title="Purple" />
             </div>
             <div className="orbit orbit-two">
-              <span className="orbit-star star-cyan-2" />
-              <span className="orbit-star star-gold-2" />
+              <span className="orbit-dot dot-gold" title="Gold" />
+              <span className="orbit-dot dot-pink" title="Pink" />
+              <span className="orbit-dot dot-orange" title="Orange" />
             </div>
             <div className="profile-stage">
               <div className="profile-frame">

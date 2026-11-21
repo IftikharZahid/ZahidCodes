@@ -873,32 +873,32 @@ button, input, textarea {
   }
 }
 
-/* Digital Star Node on Orbit */
-.orbit-star {
+/* Digital Orbit Dots (Total 6 different colored dots around the picture) */
+.orbit-dot {
   position: absolute;
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
   transition: box-shadow 0.3s, background 0.3s;
 }
 
-/* Digital 4-point tech star sparkle flare */
-.orbit-star::before {
+/* Digital cross-sparkle flare & halo */
+.orbit-dot::before {
   content: "";
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   transform: translate(-50%, -50%) rotate(45deg);
   background: radial-gradient(circle, currentColor 25%, transparent 75%);
   border-radius: 2px;
-  animation: starPulse 2.4s ease-in-out infinite alternate;
+  animation: dotStarPulse 2.4s ease-in-out infinite alternate;
 }
 
-.orbit-star::after {
+.orbit-dot::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -910,7 +910,7 @@ button, input, textarea {
   opacity: 0.85;
 }
 
-@keyframes starPulse {
+@keyframes dotStarPulse {
   0% {
     transform: translate(-50%, -50%) rotate(0deg) scale(0.85);
     opacity: 0.7;
@@ -925,59 +925,102 @@ button, input, textarea {
   }
 }
 
-/* Star positions on ring */
-.star-cyan-1 {
-  top: -4px;
+/* 6 Distinctly Colored Dots Positioned Around the Picture */
+/* Inner Orbit-One: 3 Dots at 0°, 120°, 240° */
+.dot-cyan {
+  top: -5px;
   left: 50%;
   transform: translateX(-50%);
   background: #ffffff;
-  color: #3bd6e8;
-  box-shadow: 0 0 8px #3bd6e8, 0 0 16px rgba(59, 214, 232, 0.8), 0 0 24px rgba(59, 214, 232, 0.4);
+  color: #00f0ff;
+  box-shadow: 0 0 10px #00f0ff, 0 0 20px rgba(0, 240, 255, 0.85), 0 0 30px rgba(0, 240, 255, 0.45);
 }
 
-.star-gold-1 {
-  bottom: -4px;
+.dot-green {
+  top: 75%;
+  left: 93.3%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  color: #10b981;
+  box-shadow: 0 0 10px #10b981, 0 0 20px rgba(16, 185, 129, 0.85), 0 0 30px rgba(16, 185, 129, 0.45);
+}
+
+.dot-purple {
+  top: 75%;
+  left: 6.7%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  color: #a855f7;
+  box-shadow: 0 0 10px #a855f7, 0 0 20px rgba(168, 85, 247, 0.85), 0 0 30px rgba(168, 85, 247, 0.45);
+}
+
+/* Outer Orbit-Two: 3 Dots at 60°, 180°, 300° */
+.dot-gold {
+  top: 25%;
+  left: 93.3%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  color: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b, 0 0 20px rgba(245, 158, 11, 0.85), 0 0 30px rgba(245, 158, 11, 0.45);
+}
+
+.dot-pink {
+  bottom: -5px;
   left: 50%;
   transform: translateX(-50%);
   background: #ffffff;
-  color: #f2bd55;
-  box-shadow: 0 0 8px #f2bd55, 0 0 16px rgba(242, 189, 85, 0.8), 0 0 24px rgba(242, 189, 85, 0.4);
+  color: #ec4899;
+  box-shadow: 0 0 10px #ec4899, 0 0 20px rgba(236, 72, 153, 0.85), 0 0 30px rgba(236, 72, 153, 0.45);
 }
 
-.star-cyan-2 {
-  top: 50%;
-  right: -4px;
-  transform: translateY(-50%);
+.dot-orange {
+  top: 25%;
+  left: 6.7%;
+  transform: translate(-50%, -50%);
   background: #ffffff;
-  color: #3bd6e8;
-  box-shadow: 0 0 8px #3bd6e8, 0 0 16px rgba(59, 214, 232, 0.8), 0 0 24px rgba(59, 214, 232, 0.4);
+  color: #ff6b4a;
+  box-shadow: 0 0 10px #ff6b4a, 0 0 20px rgba(255, 107, 74, 0.85), 0 0 30px rgba(255, 107, 74, 0.45);
 }
 
-.star-gold-2 {
-  top: 50%;
-  left: -4px;
-  transform: translateY(-50%);
-  background: #ffffff;
-  color: #f2bd55;
-  box-shadow: 0 0 8px #f2bd55, 0 0 16px rgba(242, 189, 85, 0.8), 0 0 24px rgba(242, 189, 85, 0.4);
-}
-
+/* Light Mode Overrides for Orbits & 6 Dots */
 :root[data-theme='light'] .orbit {
   border-color: rgba(7, 143, 164, 0.24);
 }
 
-:root[data-theme='light'] .star-cyan-1,
-:root[data-theme='light'] .star-cyan-2 {
+:root[data-theme='light'] .dot-cyan {
   background: #0891b2;
   color: #06b6d4;
-  box-shadow: 0 0 6px rgba(8, 145, 178, 0.9), 0 0 14px rgba(8, 145, 178, 0.4);
+  box-shadow: 0 0 8px rgba(8, 145, 178, 0.9), 0 0 16px rgba(8, 145, 178, 0.45);
 }
 
-:root[data-theme='light'] .star-gold-1,
-:root[data-theme='light'] .star-gold-2 {
+:root[data-theme='light'] .dot-green {
+  background: #059669;
+  color: #10b981;
+  box-shadow: 0 0 8px rgba(5, 150, 105, 0.9), 0 0 16px rgba(5, 150, 105, 0.45);
+}
+
+:root[data-theme='light'] .dot-purple {
+  background: #7c3aed;
+  color: #8b5cf6;
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.9), 0 0 16px rgba(124, 58, 237, 0.45);
+}
+
+:root[data-theme='light'] .dot-gold {
   background: #d97706;
   color: #f59e0b;
-  box-shadow: 0 0 6px rgba(217, 119, 6, 0.9), 0 0 14px rgba(217, 119, 6, 0.35);
+  box-shadow: 0 0 8px rgba(217, 119, 6, 0.9), 0 0 16px rgba(217, 119, 6, 0.45);
+}
+
+:root[data-theme='light'] .dot-pink {
+  background: #db2777;
+  color: #ec4899;
+  box-shadow: 0 0 8px rgba(219, 39, 119, 0.9), 0 0 16px rgba(219, 39, 119, 0.45);
+}
+
+:root[data-theme='light'] .dot-orange {
+  background: #ea580c;
+  color: #f97316;
+  box-shadow: 0 0 8px rgba(234, 88, 12, 0.9), 0 0 16px rgba(234, 88, 12, 0.45);
 }
 
 /* Profile Stage and Frame */
@@ -2388,6 +2431,17 @@ button, input, textarea {
   .orbit-two {
     width: 300px;
     height: 300px;
+  }
+  .orbit-dot {
+    width: 8px;
+    height: 8px;
+  }
+  .orbit-dot::before {
+    width: 13px;
+    height: 13px;
+  }
+  .orbit-dot::after {
+    height: 16px;
   }
   .profile-stage {
     position: relative;
