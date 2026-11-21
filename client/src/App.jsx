@@ -702,38 +702,46 @@ function Home() {
             </div>
           </div>
           <div className="hero-visual">
-            <div className="orbit orbit-one" />
-            <div className="orbit orbit-two" />
-            <div className="profile-frame">
-              <img src="/assets/iftikhar-zahid.png" alt="Iftikhar Zahid" />
+            <div className="orbit orbit-one">
+              <span className="orbit-star star-cyan-1" />
+              <span className="orbit-star star-gold-1" />
             </div>
-            <div className="floating-card code-card">
-              <Code2 />
-              <span>
-                <b>Clean code</b>
-                <small>Built to scale</small>
-              </span>
+            <div className="orbit orbit-two">
+              <span className="orbit-star star-cyan-2" />
+              <span className="orbit-star star-gold-2" />
             </div>
-            <div className="floating-card stack-card">
-              <Layers3 />
-              <span>
-                <b>Full-stack</b>
-                <small>Web · Mobile · AI</small>
-              </span>
-            </div>
-            <div className="floating-card impact-card">
-              <Sparkles />
-              <span>
-                <b>Product thinking</b>
-                <small>Ideas into outcomes</small>
-              </span>
-            </div>
-            <div className="floating-card delivery-card">
-              <CheckCircle2 />
-              <span>
-                <b>Reliable delivery</b>
-                <small>Built for real people</small>
-              </span>
+            <div className="profile-stage">
+              <div className="profile-frame">
+                <img src="/assets/iftikhar-zahid.png" alt="Iftikhar Zahid" />
+              </div>
+              <div className="floating-card code-card">
+                <Code2 />
+                <span>
+                  <b>Clean code</b>
+                  <small>Built to scale</small>
+                </span>
+              </div>
+              <div className="floating-card stack-card">
+                <Layers3 />
+                <span>
+                  <b>Full-stack</b>
+                  <small>Web · Mobile · AI</small>
+                </span>
+              </div>
+              <div className="floating-card impact-card">
+                <Sparkles />
+                <span>
+                  <b>Product thinking</b>
+                  <small>Ideas into outcomes</small>
+                </span>
+              </div>
+              <div className="floating-card delivery-card">
+                <CheckCircle2 />
+                <span>
+                  <b>Reliable delivery</b>
+                  <small>Built for real people</small>
+                </span>
+              </div>
             </div>
           </div>
         </section>

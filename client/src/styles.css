@@ -832,29 +832,169 @@ button, input, textarea {
   place-items: center;
 }
 
+/* Orbit Circles & Tech Digital Stars */
 .orbit {
   position: absolute;
-  border: 1px solid rgba(60, 114, 145, 0.28);
+  left: 50%;
+  top: 50%;
+  border: 1px dashed rgba(86, 217, 232, 0.28);
   border-radius: 50%;
-  transform: rotate(-20deg);
   pointer-events: none;
+  z-index: 1;
 }
 
 .orbit-one {
-  width: 400px;
-  height: 280px;
+  width: 410px;
+  height: 410px;
+  animation: orbitSpinOne 28s linear infinite;
 }
 
 .orbit-two {
-  width: 480px;
-  height: 360px;
-  transform: rotate(35deg);
+  width: 500px;
+  height: 500px;
+  animation: orbitSpinTwo 38s linear infinite;
+}
+
+@keyframes orbitSpinOne {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes orbitSpinTwo {
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+/* Digital Star Node on Orbit */
+.orbit-star {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  transition: box-shadow 0.3s, background 0.3s;
+}
+
+/* Digital 4-point tech star sparkle flare */
+.orbit-star::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: radial-gradient(circle, currentColor 25%, transparent 75%);
+  border-radius: 2px;
+  animation: starPulse 2.4s ease-in-out infinite alternate;
+}
+
+.orbit-star::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(to bottom, transparent, currentColor, transparent);
+  opacity: 0.85;
+}
+
+@keyframes starPulse {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(45deg) scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(90deg) scale(0.85);
+    opacity: 0.7;
+  }
+}
+
+/* Star positions on ring */
+.star-cyan-1 {
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  color: #3bd6e8;
+  box-shadow: 0 0 8px #3bd6e8, 0 0 16px rgba(59, 214, 232, 0.8), 0 0 24px rgba(59, 214, 232, 0.4);
+}
+
+.star-gold-1 {
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  color: #f2bd55;
+  box-shadow: 0 0 8px #f2bd55, 0 0 16px rgba(242, 189, 85, 0.8), 0 0 24px rgba(242, 189, 85, 0.4);
+}
+
+.star-cyan-2 {
+  top: 50%;
+  right: -4px;
+  transform: translateY(-50%);
+  background: #ffffff;
+  color: #3bd6e8;
+  box-shadow: 0 0 8px #3bd6e8, 0 0 16px rgba(59, 214, 232, 0.8), 0 0 24px rgba(59, 214, 232, 0.4);
+}
+
+.star-gold-2 {
+  top: 50%;
+  left: -4px;
+  transform: translateY(-50%);
+  background: #ffffff;
+  color: #f2bd55;
+  box-shadow: 0 0 8px #f2bd55, 0 0 16px rgba(242, 189, 85, 0.8), 0 0 24px rgba(242, 189, 85, 0.4);
+}
+
+:root[data-theme='light'] .orbit {
+  border-color: rgba(7, 143, 164, 0.24);
+}
+
+:root[data-theme='light'] .star-cyan-1,
+:root[data-theme='light'] .star-cyan-2 {
+  background: #0891b2;
+  color: #06b6d4;
+  box-shadow: 0 0 6px rgba(8, 145, 178, 0.9), 0 0 14px rgba(8, 145, 178, 0.4);
+}
+
+:root[data-theme='light'] .star-gold-1,
+:root[data-theme='light'] .star-gold-2 {
+  background: #d97706;
+  color: #f59e0b;
+  box-shadow: 0 0 6px rgba(217, 119, 6, 0.9), 0 0 14px rgba(217, 119, 6, 0.35);
+}
+
+/* Profile Stage and Frame */
+.profile-stage {
+  position: relative;
+  width: 310px;
+  height: 355px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
 }
 
 .profile-frame {
   position: relative;
-  width: 310px;
-  height: 355px;
+  width: 100%;
+  height: 100%;
   border-radius: 155px 155px 32px 32px;
   overflow: hidden;
   background: radial-gradient(circle at 50% 28%, #1b4573 0%, #0f233d 55%, #081220 100%);
@@ -880,7 +1020,7 @@ button, input, textarea {
 
 .floating-card {
   position: absolute;
-  z-index: 3;
+  z-index: 6;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -914,32 +1054,32 @@ button, input, textarea {
 }
 
 .code-card {
-  left: 10px;
-  top: 90px;
-}
-
-.stack-card {
-  right: 10px;
-  bottom: 70px;
+  left: -55px;
+  top: 75px;
 }
 
 .impact-card {
-  right: 22px;
-  top: 34px;
-  transform: scale(0.9);
-  opacity: 0.96;
+  right: -55px;
+  top: 40px;
+  transform: scale(0.95);
+  opacity: 0.98;
 }
 
 .delivery-card {
-  left: 20px;
-  bottom: 25px;
-  transform: scale(0.9);
-  opacity: 0.96;
+  left: -48px;
+  bottom: 35px;
+  transform: scale(0.95);
+  opacity: 0.98;
+}
+
+.stack-card {
+  right: -48px;
+  bottom: 60px;
 }
 
 .impact-card:hover,
 .delivery-card:hover {
-  transform: scale(0.94) translateY(-2px);
+  transform: scale(0.98) translateY(-2px);
 }
 
 /* ==========================================================================
@@ -1982,28 +2122,42 @@ button, input, textarea {
     height: 400px;
     margin-top: 10px;
     position: relative;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .orbit-one {
+    width: 330px;
+    height: 330px;
+  }
+  .orbit-two {
+    width: 410px;
+    height: 410px;
+  }
+  .profile-stage {
+    width: 270px;
+    height: 315px;
   }
   .profile-frame {
-    width: 280px;
-    height: 325px;
-    border-radius: 140px 140px 28px 28px;
+    width: 100%;
+    height: 100%;
+    border-radius: 135px 135px 28px 28px;
   }
   .code-card {
-    left: 12px;
-    top: 60px;
+    left: -46px;
+    top: 55px;
   }
   .impact-card {
-    right: 12px;
+    right: -46px;
     top: 30px;
   }
   .delivery-card {
-    left: 12px;
+    left: -38px;
     bottom: 30px;
   }
   .stack-card {
-    right: 12px;
-    bottom: 55px;
+    right: -38px;
+    bottom: 50px;
   }
   .trust-strip {
     margin: 0 20px 16px;
@@ -2217,41 +2371,53 @@ button, input, textarea {
     display: block;
   }
   .hero-visual {
-    height: 360px;
+    height: 350px;
     width: 100%;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-top: 10px;
   }
-  .profile-frame {
-    width: 195px;
-    height: 250px;
-    border-radius: 98px 98px 22px 22px;
-  }
   .orbit-one {
-    width: 260px;
-    height: 190px;
+    width: 250px;
+    height: 250px;
   }
   .orbit-two {
-    width: 290px;
-    height: 230px;
+    width: 300px;
+    height: 300px;
+  }
+  .profile-stage {
+    position: relative;
+    width: 195px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+  }
+  .profile-frame {
+    width: 100%;
+    height: 100%;
+    border-radius: 98px 98px 22px 22px;
   }
   .floating-card {
     display: flex !important;
     align-items: center;
-    gap: 7px;
-    padding: 6px 10px;
+    gap: 6px;
+    padding: 6px 9px;
     border-radius: 10px;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), 0 0 18px rgba(59, 214, 232, 0.12);
-    z-index: 4;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45), 0 0 16px rgba(59, 214, 232, 0.12);
+    z-index: 6;
     opacity: 1;
   }
   .floating-card svg {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     flex-shrink: 0;
   }
   .floating-card span {
@@ -2259,32 +2425,32 @@ button, input, textarea {
     min-width: 0;
   }
   .floating-card b {
-    font-size: 10.5px;
+    font-size: 10px;
     white-space: nowrap;
   }
   .floating-card small {
-    font-size: 8px;
+    font-size: 7.5px;
     white-space: nowrap;
   }
   .code-card {
-    left: 4px;
+    left: -36px;
     top: 20px;
   }
   .impact-card {
-    right: 4px;
-    top: 42px;
+    right: -36px;
+    top: 40px;
     transform: none;
     opacity: 1;
   }
   .delivery-card {
-    left: 4px;
-    bottom: 42px;
+    left: -30px;
+    bottom: 30px;
     transform: none;
     opacity: 1;
   }
   .stack-card {
-    right: 4px;
-    bottom: 20px;
+    right: -30px;
+    bottom: 16px;
   }
   .impact-card:hover,
   .delivery-card:hover {
@@ -2428,15 +2594,27 @@ button, input, textarea {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
+    width: 100%;
   }
   .social-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 9px 4px;
     font-size: 11px;
     gap: 5px;
-    justify-content: center;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .social-pill svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
   }
   .social-pill span {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .footer-links {
     justify-content: center;
@@ -2502,42 +2680,54 @@ button, input, textarea {
 /* Extra small devices (<= 380px) */
 @media (max-width: 380px) {
   .hero-visual {
-    height: 335px;
+    height: 310px;
+  }
+  .orbit-one {
+    width: 220px;
+    height: 220px;
+  }
+  .orbit-two {
+    width: 260px;
+    height: 260px;
+  }
+  .profile-stage {
+    width: 170px;
+    height: 220px;
   }
   .profile-frame {
-    width: 175px;
-    height: 230px;
-    border-radius: 88px 88px 20px 20px;
+    width: 100%;
+    height: 100%;
+    border-radius: 85px 85px 18px 18px;
   }
   .floating-card {
-    padding: 5px 8px;
+    padding: 5px 7px;
     gap: 5px;
   }
   .floating-card svg {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
   }
   .floating-card b {
     font-size: 9px;
   }
   .floating-card small {
-    font-size: 7.5px;
+    font-size: 7px;
   }
   .code-card {
-    left: 2px;
+    left: -24px;
     top: 14px;
   }
   .impact-card {
-    right: 2px;
-    top: 36px;
+    right: -24px;
+    top: 32px;
   }
   .delivery-card {
-    left: 2px;
-    bottom: 36px;
+    left: -20px;
+    bottom: 24px;
   }
   .stack-card {
-    right: 2px;
-    bottom: 14px;
+    right: -20px;
+    bottom: 12px;
   }
   .hero-stats b {
     font-size: 14px;
@@ -2546,11 +2736,19 @@ button, input, textarea {
     font-size: 8px;
   }
   .contact-social-row {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px;
   }
   .social-pill {
-    padding: 8px 12px;
-    justify-content: flex-start;
+    padding: 8px 2px;
+    font-size: 10px;
+    gap: 4px;
+    justify-content: center;
+  }
+  .social-pill svg {
+    width: 13px;
+    height: 13px;
   }
   .brand {
     font-size: 16px;
