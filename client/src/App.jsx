@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Routes, Route, Link, useNavigate, useParams } from "react-router-dom";
+import { Routes, Route, Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   ArrowUpRight,
   Github,
@@ -34,6 +34,7 @@ import {
   Moon,
   Sun,
   PlayCircle,
+  AlertCircle,
 } from "lucide-react";
 import { seedProjects } from "./data/seedProjects";
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -61,6 +62,8 @@ function WhatsAppIcon({ size = 18, className = "" }) {
 }
 function Header() {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [lightMode, setLightMode] = useState(() => {
     const saved = localStorage.getItem("zc-theme");
     return saved === "light";
@@ -71,26 +74,70 @@ function Header() {
     localStorage.setItem("zc-theme", lightMode ? "light" : "dark");
   }, [lightMode]);
 
+  const scrollToSection = (targetId) => {
+    setOpen(false);
+    if (location.pathname === "/") {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.history.replaceState(null, "", `#${targetId}`);
+      }
+    } else {
+      navigate(`/#${targetId}`);
+    }
+  };
+
   return (
     <header className="nav">
-      <Link to="/" className="brand">
-        <img src="/assets/zahidcodes-logo.png" />
+      <Link
+        to="/"
+        className="brand"
+        onClick={() => {
+          setOpen(false);
+          if (location.pathname === "/") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        }}
+      >
+        <img src="/assets/zahidcodes-logo.png" alt="ZahidCodes" />
         <span>
           Zahid<span className="cyan">Codes</span>
           <small>DECODING THE FUTURE</small>
         </span>
       </Link>
-      <button className="mobile-menu" onClick={() => setOpen(!open)}>
+      <button
+        className="mobile-menu"
+        onClick={() => setOpen(!open)}
+        aria-label="Toggle navigation menu"
+      >
         {open ? <X /> : <Menu />}
       </button>
       <nav className={open ? "navlinks show" : "navlinks"}>
-        <a href="#work" onClick={() => setOpen(false)}>
+        <a
+          href="/#work"
+          onClick={(e) => {
+            e.preventDefault();
+            scrollToSection("work");
+          }}
+        >
           Projects
         </a>
-        <a href="#services" onClick={() => setOpen(false)}>
+        <a
+          href="/#services"
+          onClick={(e) => {
+            e.preventDefault();
+            scrollToSection("services");
+          }}
+        >
           What I do
         </a>
-        <a href="#about" onClick={() => setOpen(false)}>
+        <a
+          href="/#about"
+          onClick={(e) => {
+            e.preventDefault();
+            scrollToSection("about");
+          }}
+        >
           About
         </a>
         <button
@@ -103,7 +150,14 @@ function Header() {
           {lightMode ? <Moon size={16} /> : <Sun size={16} />}
           <span>{lightMode ? "Dark mode" : "Light mode"}</span>
         </button>
-        <a href="#contact" className="nav-cta" onClick={() => setOpen(false)}>
+        <a
+          href="/#contact"
+          className="nav-cta"
+          onClick={(e) => {
+            e.preventDefault();
+            scrollToSection("contact");
+          }}
+        >
           Let's talk <ArrowUpRight size={16} />
         </a>
       </nav>
@@ -232,6 +286,49 @@ function youtubeEmbedUrl(value = "") {
   }
 }
 
+function parseVideoSource(value = "") {
+  if (!value || typeof value !== "string") return null;
+  const raw = value.trim();
+  if (!raw) return null;
+
+  const ytEmbed = youtubeEmbedUrl(raw);
+  if (ytEmbed) {
+    return {
+      type: "youtube",
+      embedUrl: ytEmbed,
+      rawUrl: raw,
+      label: "YouTube",
+    };
+  }
+
+  try {
+    const parsed = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    if (host === "vimeo.com") {
+      const match = parsed.pathname.match(/\/(\d+)/);
+      if (match) {
+        return {
+          type: "vimeo",
+          embedUrl: `https://player.vimeo.com/video/${match[1]}`,
+          rawUrl: raw,
+          label: "Vimeo",
+        };
+      }
+    }
+  } catch {}
+
+  if (/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(raw) || raw.startsWith("/uploads/")) {
+    return {
+      type: "direct",
+      embedUrl: mediaUrl(raw),
+      rawUrl: raw,
+      label: "Video",
+    };
+  }
+
+  return null;
+}
+
 function ProjectDetail() {
   const { slug } = useParams();
   const [project, setProject] = useState(null);
@@ -239,6 +336,7 @@ function ProjectDetail() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
     let active = true;
     axios
       .get(`${API}/projects/${slug}`)
@@ -270,7 +368,7 @@ function ProjectDetail() {
     );
   }
 
-  const video = youtubeEmbedUrl(project.videoUrl || project.youtubeUrl);
+  const video = parseVideoSource(project.videoUrl || project.youtubeUrl);
   const features = Array.isArray(project.features)
     ? project.features
     : (project.features || "").split(",").map((item) => item.trim()).filter(Boolean);
@@ -298,14 +396,58 @@ function ProjectDetail() {
                   <Github size={16} /> Source code
                 </a>
               )}
+              {video && video.rawUrl !== project.liveUrl && (
+                <a
+                  className="button ghost"
+                  href={video.rawUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <PlayCircle size={16} /> Watch on {video.label}
+                </a>
+              )}
             </div>
           </div>
-          <img
-            className="project-detail-image"
-            src={mediaUrl(project.image)}
-            alt={`${project.title} preview`}
-            onError={(e) => (e.currentTarget.src = "/assets/projects/web-platform.svg")}
-          />
+          <div className="project-detail-media">
+            {video ? (
+              <div className="video-card project-hero-video-card">
+                <div className="video-card-bar">
+                  <span className="video-status">
+                    <i /> Project video
+                  </span>
+                  <span className="video-brand">{video.label}</span>
+                </div>
+                <div className="video-frame hero-video-frame">
+                  {video.type === "direct" ? (
+                    <video
+                      src={video.embedUrl}
+                      controls
+                      playsInline
+                      className="hero-video-element"
+                    />
+                  ) : (
+                    <iframe
+                      src={`${video.embedUrl}?rel=0&modestbranding=1`}
+                      title={`${project.title} video`}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  )}
+                </div>
+              </div>
+            ) : (
+              <img
+                className="project-detail-image"
+                src={mediaUrl(project.image)}
+                alt={`${project.title} preview`}
+                onError={(e) =>
+                  (e.currentTarget.src = "/assets/projects/web-platform.svg")
+                }
+              />
+            )}
+          </div>
         </div>
         <div className="project-detail-layout">
           <article className="project-detail-main">
@@ -320,40 +462,6 @@ function ProjectDetail() {
                 <ul className="feature-list">
                   {features.map((feature) => <li key={feature}>{feature}</li>)}
                 </ul>
-              </section>
-            )}
-            {video && (
-              <section className="detail-section">
-                <div className="video-heading">
-                  <div>
-                    <p className="eyebrow">PROJECT WALKTHROUGH</p>
-                    <h2>See it in action.</h2>
-                  </div>
-                  <a
-                    className="video-source-link"
-                    href={project.videoUrl || project.youtubeUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Watch on YouTube <ExternalLink size={14} />
-                  </a>
-                </div>
-                <div className="video-card">
-                  <div className="video-card-bar">
-                    <span className="video-status"><i /> Project video</span>
-                    <span className="video-brand">YouTube</span>
-                  </div>
-                  <div className="video-frame">
-                    <iframe
-                      src={`${video}?rel=0&modestbranding=1`}
-                      title={`${project.title} video walkthrough`}
-                      loading="lazy"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      allowFullScreen
-                    />
-                  </div>
-                </div>
               </section>
             )}
           </article>
@@ -382,6 +490,23 @@ function Home() {
     [category, setCategory] = useState("All"),
     [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const targetId = location.hash.replace("#", "");
+      const timer = setTimeout(() => {
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [location.pathname, location.hash]);
+
   useEffect(() => {
     axios
       .get(`${API}/projects`)
@@ -424,7 +549,7 @@ function Home() {
               <span className="gradient-text">digital experiences.</span>
             </h1>
             <p className="hero-desc">
-              I’m Iftikhar Zahid — building useful software, mobile apps and web
+              I’m <strong className="hero-name-highlight">Iftikhar Zahid</strong> — building useful software, mobile apps and web
               platforms that solve real-world problems.
             </p>
             <div className="hero-actions">
@@ -689,9 +814,16 @@ function Home() {
         </section>
       </main>
       <footer className="footer">
-        <Link to="/" className="footer-brand">
-          <img src="/assets/zahidcodes-logo.png" alt="" />
-          Zahid<span>Codes</span>
+        <Link
+          to="/"
+          className="brand"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        >
+          <img src="/assets/zahidcodes-logo.png" alt="ZahidCodes" />
+          <span>
+            Zahid<span className="cyan">Codes</span>
+            <small>DECODING THE FUTURE</small>
+          </span>
         </Link>
         <span>
           © {new Date().getFullYear()} ZahidCodes. Built with purpose.
@@ -824,7 +956,6 @@ function AIAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [teaser, setTeaser] = useState(true);
   const messagesEndRef = React.useRef(null);
 
   const quickPrompts = [
@@ -841,7 +972,6 @@ function AIAssistant() {
   useEffect(() => {
     if (open) {
       scrollToBottom();
-      setTeaser(false);
     }
   }, [open, messages, loading]);
 
@@ -931,28 +1061,8 @@ function AIAssistant() {
         />
       )}
 
-      {/* Floating Trigger Button */}
+      {/* Floating Trigger Button - STRICTLY "Ask AI" */}
       <div className={`ai-floating-wrap ${open ? "is-open" : ""}`}>
-        {teaser && !open && (
-          <div className="ai-teaser" onClick={() => setOpen(true)}>
-            <div className="ai-teaser-text">
-              <Sparkles size={13} className="cyan" />
-              <span>Ask AI about Iftikhar</span>
-            </div>
-            <button
-              type="button"
-              className="ai-teaser-close"
-              onClick={(e) => {
-                e.stopPropagation();
-                setTeaser(false);
-              }}
-              aria-label="Dismiss message"
-            >
-              <X size={12} />
-            </button>
-          </div>
-        )}
-
         <button
           type="button"
           className={`ai-trigger-btn ${open ? "active" : ""}`}
@@ -961,7 +1071,7 @@ function AIAssistant() {
           title="Chat with ZahidCodes AI"
         >
           <span className="ai-pulse-dot" />
-          {open ? <X size={20} /> : <Bot size={20} />}
+          {open ? <X size={18} /> : <Bot size={18} />}
           <span className="ai-trigger-label">{open ? "Close" : "Ask AI"}</span>
         </button>
       </div>
@@ -975,7 +1085,13 @@ function AIAssistant() {
           aria-label="AI Assistant Window"
         >
           {/* Mobile Sheet Pull Bar */}
-          <div className="ai-mobile-handle-bar">
+          <div
+            className="ai-mobile-handle-bar"
+            onClick={() => setOpen(false)}
+            title="Close AI Assistant"
+            role="button"
+            tabIndex={0}
+          >
             <span className="ai-mobile-handle" />
           </div>
 
@@ -1159,27 +1275,52 @@ function AdminLogin() {
 }
 
 function Admin() {
-  const nav = useNavigate(),
-    [items, setItems] = useState([]),
-    [loading, setLoading] = useState(true),
-    [form, setForm] = useState(null),
-    [message, setMessage] = useState("");
-  const token = localStorage.getItem("zc_token");
-  const headers = { Authorization: `Bearer ${token}` };
+  const nav = useNavigate();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState(null);
+  const [notice, setNotice] = useState(null);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [previewImg, setPreviewImg] = useState("");
+
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("zc_token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   async function load() {
+    setLoading(true);
     try {
-      const r = await axios.get(`${API}/projects?admin=true`);
+      const token = localStorage.getItem("zc_token");
+      if (!token) {
+        nav("/admin/login");
+        return;
+      }
+      const r = await axios.get(`${API}/projects?admin=true`, {
+        headers: getAuthHeaders(),
+      });
       const databaseProjects = Array.isArray(r.data) ? r.data : [];
-      setItems(databaseProjects.length ? databaseProjects : seedProjects);
-    } catch {
-      setItems(seedProjects);
-      setMessage("Showing showcase projects. Connect the API to manage saved projects.");
+      setItems(databaseProjects);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem("zc_token");
+        nav("/admin/login");
+        return;
+      }
+      setNotice({
+        type: "error",
+        text: "Could not connect to database API. Make sure port 5000 is running.",
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   useEffect(() => {
+    const token = localStorage.getItem("zc_token");
     if (!token) {
       nav("/admin/login");
       return;
@@ -1192,41 +1333,136 @@ function Admin() {
     nav("/admin/login");
   }
 
-  async function save(e) {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    try {
-      if (form._id)
-        await axios.put(`${API}/projects/${form._id}`, fd, { headers });
-      else await axios.post(`${API}/projects`, fd, { headers });
-      setMessage("Project saved successfully.");
-      setForm(null);
-      load();
-    } catch (e) {
-      setMessage(
-        e.response?.data?.message || "Save failed. Check API and MongoDB.",
-      );
+  function openEdit(p) {
+    setForm(p);
+    setPreviewImg(p.image ? mediaUrl(p.image) : "");
+  }
+
+  function openNew() {
+    setForm({});
+    setPreviewImg("");
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreviewImg(URL.createObjectURL(file));
     }
   }
 
-  async function del(id) {
-    if (!id || String(id).startsWith("seed-")) {
-      setMessage("Showcase projects cannot be deleted until they are saved in the CMS.");
-      return;
-    }
-    if (!confirm("Delete this project?")) return;
+  async function save(e) {
+    e.preventDefault();
+    setSaving(true);
+    setNotice(null);
+
+    const fd = new FormData(e.currentTarget);
+    const featuredChecked = !!e.currentTarget.querySelector('input[name="featured"]')?.checked;
+    fd.set("featured", featuredChecked ? "true" : "false");
+
+    const targetId = form._id || (form.id && !String(form.id).startsWith("seed-") ? form.id : null);
+
     try {
-      await axios.delete(`${API}/projects/${id}`, { headers });
-      setMessage("Project deleted.");
-      load();
-    } catch {
-      setMessage("Delete failed.");
+      const headers = getAuthHeaders();
+      if (targetId) {
+        await axios.put(`${API}/projects/${targetId}`, fd, { headers });
+        setNotice({ type: "success", text: `Project "${fd.get("title")}" updated successfully!` });
+      } else {
+        await axios.post(`${API}/projects`, fd, { headers });
+        setNotice({ type: "success", text: `Project "${fd.get("title")}" created successfully!` });
+      }
+      setForm(null);
+      await load();
+    } catch (err) {
+      if (err.response?.status === 401) {
+        setNotice({
+          type: "error",
+          text: "Session expired. Please sign in again.",
+          action: () => nav("/admin/login"),
+        });
+      } else {
+        setNotice({
+          type: "error",
+          text: err.response?.data?.message || "Failed to save project. Check API and fields.",
+        });
+      }
+    } finally {
+      setSaving(false);
     }
   }
+
+  async function del(id, title) {
+    if (!id) return;
+    if (!confirm(`Are you sure you want to delete "${title || "this project"}"?`)) return;
+    try {
+      const headers = getAuthHeaders();
+      await axios.delete(`${API}/projects/${id}`, { headers });
+      setNotice({ type: "success", text: "Project deleted successfully." });
+      await load();
+    } catch (err) {
+      setNotice({ type: "error", text: err.response?.data?.message || "Delete failed." });
+    }
+  }
+
+  async function toggleFeatured(p) {
+    try {
+      const headers = getAuthHeaders();
+      await axios.put(`${API}/projects/${p._id}`, { featured: !p.featured }, { headers });
+      setItems((prev) =>
+        prev.map((item) => (item._id === p._id ? { ...item, featured: !p.featured } : item))
+      );
+      setNotice({
+        type: "success",
+        text: `"${p.title}" is now ${!p.featured ? "Featured" : "Standard"}.`,
+      });
+    } catch {
+      setNotice({ type: "error", text: "Failed to update featured status." });
+    }
+  }
+
+  async function toggleStatus(p) {
+    const nextStatus = p.status === "draft" ? "published" : "draft";
+    try {
+      const headers = getAuthHeaders();
+      await axios.put(`${API}/projects/${p._id}`, { status: nextStatus }, { headers });
+      setItems((prev) =>
+        prev.map((item) => (item._id === p._id ? { ...item, status: nextStatus } : item))
+      );
+      setNotice({
+        type: "success",
+        text: `"${p.title}" status changed to ${nextStatus}.`,
+      });
+    } catch {
+      setNotice({ type: "error", text: "Failed to update status." });
+    }
+  }
+
+  const categories = useMemo(
+    () => ["All", ...new Set(items.map((x) => x.category).filter(Boolean))],
+    [items]
+  );
+
+  const filtered = useMemo(() => {
+    return items.filter((p) => {
+      const q = search.toLowerCase();
+      const matchesSearch =
+        !q ||
+        (p.title + " " + p.category + " " + (p.technologies || []).join(" ") + " " + (p.summary || ""))
+          .toLowerCase()
+          .includes(q);
+      const matchesCategory = categoryFilter === "All" || p.category === categoryFilter;
+      const matchesStatus =
+        statusFilter === "All"
+          ? true
+          : statusFilter === "featured"
+          ? p.featured
+          : p.status === statusFilter;
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [items, search, categoryFilter, statusFilter]);
 
   return (
     <div className="admin-layout">
-      {/* Sidebar for desktop / Header topbar for mobile & tablets */}
+      {/* Sidebar */}
       <aside className="admin-side">
         <div className="admin-side-top">
           <Link to="/" className="brand">
@@ -1236,18 +1472,10 @@ function Admin() {
             </span>
           </Link>
           <div className="admin-mobile-nav-actions">
-            <Link
-              to="/"
-              className="admin-nav-link"
-              title="View Portfolio Website"
-            >
+            <Link to="/" className="admin-nav-link" title="View Portfolio Website">
               <ExternalLink size={14} /> <span>View site</span>
             </Link>
-            <button
-              onClick={logout}
-              className="admin-nav-btn logout-pill"
-              title="Sign out"
-            >
+            <button onClick={logout} className="admin-nav-btn logout-pill" title="Sign out">
               <LogOut size={14} /> <span>Sign out</span>
             </button>
           </div>
@@ -1255,14 +1483,11 @@ function Admin() {
 
         <div className="admin-side-body">
           <p className="side-label">WORKSPACE</p>
-          <div className="side-active">
-            <LayoutDashboard size={17} /> <span>Overview</span>
-          </div>
           <div className="side-active current">
             <FolderKanban size={17} /> <span>Projects</span>
           </div>
           <Link to="/" className="side-link">
-            <Globe size={17} /> <span>View Website</span>
+            <Globe size={17} /> <span>Live Website</span>
           </Link>
         </div>
 
@@ -1273,61 +1498,143 @@ function Admin() {
         </div>
       </aside>
 
+      {/* Main Content */}
       <main className="admin-main">
+        {/* Top Header */}
         <div className="admin-top">
           <div className="admin-top-text">
             <p className="eyebrow">PORTFOLIO CMS</p>
             <h1>Projects</h1>
             <p className="admin-subtitle">
-              Manage the work displayed on ZahidCodes.tech.
+              Manage showcase case studies and products displayed on ZahidCodes.tech
             </p>
           </div>
-          <button
-            className="button primary add-btn"
-            onClick={() => setForm({})}
-          >
-            <Plus size={18} /> <span>Add project</span>
-          </button>
+          <div className="admin-top-actions">
+            <button
+              type="button"
+              className="button ghost refresh-btn"
+              onClick={load}
+              title="Reload projects from database"
+            >
+              <RotateCcw size={15} /> <span>Refresh</span>
+            </button>
+            <button className="button primary add-btn" onClick={openNew}>
+              <Plus size={16} /> <span>Add project</span>
+            </button>
+          </div>
         </div>
 
-        {message && (
-          <div className="notice">
-            <div className="notice-inner">
-              <CheckCircle2 size={16} />
-              <span>{message}</span>
+        {/* Alert Notifications */}
+        {notice && (
+          <div className={`admin-notice-bar ${notice.type}`}>
+            <div className="admin-notice-content">
+              {notice.type === "error" ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
+              <span>{notice.text}</span>
+              {notice.action && (
+                <button type="button" className="notice-action-btn" onClick={notice.action}>
+                  Sign in
+                </button>
+              )}
             </div>
             <button
               type="button"
-              className="notice-close"
-              onClick={() => setMessage("")}
+              className="notice-dismiss-btn"
+              onClick={() => setNotice(null)}
+              aria-label="Dismiss notice"
             >
               <X size={15} />
             </button>
           </div>
         )}
 
-        {/* Dashboard KPIs */}
-        <div className="admin-kpis">
-          <div className="kpi-card">
-            <span>Total projects</span>
-            <b>{items.length}</b>
+        {/* Compact KPI Strip */}
+        <div className="compact-kpi-bar">
+          <div className="kpi-item">
+            <span className="kpi-tag">TOTAL</span>
+            <b className="kpi-val">{items.length}</b>
           </div>
-          <div className="kpi-card">
-            <span>Featured</span>
-            <b>{items.filter((x) => x.featured).length}</b>
+          <div className="kpi-sep" />
+          <div className="kpi-item">
+            <span className="kpi-tag">PUBLISHED</span>
+            <b className="kpi-val status-green">
+              {items.filter((x) => x.status === "published").length}
+            </b>
           </div>
-          <div className="kpi-card">
-            <span>Published</span>
-            <b>{items.filter((x) => x.status === "published").length}</b>
+          <div className="kpi-sep" />
+          <div className="kpi-item">
+            <span className="kpi-tag">DRAFTS</span>
+            <b className="kpi-val status-amber">
+              {items.filter((x) => x.status === "draft").length}
+            </b>
+          </div>
+          <div className="kpi-sep" />
+          <div className="kpi-item">
+            <span className="kpi-tag">FEATURED</span>
+            <b className="kpi-val status-cyan">
+              {items.filter((x) => x.featured).length}
+            </b>
           </div>
         </div>
 
-        {/* Desktop Data Table (> 768px) */}
-        <div className="admin-table-wrap desktop-table-wrap">
+        {/* Compact Search & Filter Toolbar */}
+        <div className="admin-toolbar">
+          <div className="toolbar-search">
+            <Search size={14} className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search by title, technology, category..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                type="button"
+                className="search-clear"
+                onClick={() => setSearch("")}
+                aria-label="Clear search"
+              >
+                <X size={13} />
+              </button>
+            )}
+          </div>
+          <div className="toolbar-filters">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="toolbar-select"
+            >
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c === "All" ? "All Categories" : c}
+                </option>
+              ))}
+            </select>
+            <div className="status-tabs">
+              {[
+                { id: "All", label: "All" },
+                { id: "published", label: "Published" },
+                { id: "draft", label: "Draft" },
+                { id: "featured", label: "★ Featured" },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`status-tab ${statusFilter === tab.id ? "active" : ""}`}
+                  onClick={() => setStatusFilter(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Compact Table View */}
+        <div className="admin-table-wrap compact-table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Project</th>
+                <th style={{ width: "38%" }}>Project</th>
                 <th>Category</th>
                 <th>Status</th>
                 <th>Featured</th>
@@ -1335,304 +1642,347 @@ function Admin() {
               </tr>
             </thead>
             <tbody>
-              {items.map((p) => (
-                <tr key={p._id || p.id}>
+              {filtered.map((p) => (
+                <tr key={p._id || p.id} className="compact-tr">
                   <td>
-                    <div className="table-project">
+                    <div className="table-project compact-project">
                       <img
                         src={mediaUrl(p.image)}
                         onError={(e) =>
-                          (e.currentTarget.src =
-                            "/assets/projects/web-platform.svg")
+                          (e.currentTarget.src = "/assets/projects/web-platform.svg")
                         }
                         alt=""
+                        className="compact-thumb"
                       />
-                      <div className="table-project-meta">
-                        <b>{p.title}</b>
-                        <small>
-                          {(p.technologies || []).slice(0, 3).join(" · ")}
+                      <div className="compact-project-info">
+                        <div className="compact-project-title-row">
+                          <b>{p.title}</b>
+                          {(p.videoUrl || p.youtubeUrl) && (
+                            <span className="compact-video-badge" title="Has video walkthrough">
+                              <PlayCircle size={11} /> Video
+                            </span>
+                          )}
+                        </div>
+                        <small className="compact-tech">
+                          {(p.technologies || []).slice(0, 3).join(" · ") || p.summary}
                         </small>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span className="category-pill">{p.category}</span>
+                    <span className="compact-cat-pill">{p.category}</span>
                   </td>
                   <td>
-                    <span className={`status ${p.status || "published"}`}>
-                      {p.status || "published"}
-                    </span>
+                    <button
+                      type="button"
+                      className={`compact-status-btn ${p.status || "published"}`}
+                      onClick={() => toggleStatus(p)}
+                      title="Click to toggle Published / Draft"
+                    >
+                      <i />
+                      <span>{p.status || "published"}</span>
+                    </button>
                   </td>
                   <td>
-                    {p.featured ? (
-                      <span className="badge-featured">
-                        <Star size={12} fill="currentColor" /> Yes
-                      </span>
-                    ) : (
-                      "—"
-                    )}
+                    <button
+                      type="button"
+                      className={`compact-star-btn ${p.featured ? "is-featured" : ""}`}
+                      onClick={() => toggleFeatured(p)}
+                      title={p.featured ? "Featured (click to unfeature)" : "Click to feature"}
+                    >
+                      <Star size={13} fill={p.featured ? "currentColor" : "none"} />
+                      <span>{p.featured ? "Featured" : "Normal"}</span>
+                    </button>
                   </td>
                   <td className="actions-cell">
-                    <button
-                      className="icon-btn"
-                      title="Edit project"
-                      onClick={() => setForm(p)}
-                    >
-                      <Pencil size={15} />
-                    </button>
-                    <button
-                      className="icon-btn danger"
-                      title="Delete project"
-                      onClick={() => del(p._id)}
-                    >
-                      <Trash2 size={15} />
-                    </button>
+                    <div className="compact-action-group">
+                      <Link
+                        to={`/projects/${p.slug || slugify(p.title)}`}
+                        target="_blank"
+                        className="compact-icon-btn preview"
+                        title="View live preview on site"
+                      >
+                        <Eye size={14} />
+                      </Link>
+                      <button
+                        type="button"
+                        className="compact-icon-btn edit"
+                        title="Edit project details"
+                        onClick={() => openEdit(p)}
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="compact-icon-btn delete"
+                        title="Delete project"
+                        onClick={() => del(p._id, p.title)}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {!items.length && !loading && (
-            <p className="empty">
-              No database projects found yet. Add your first project.
-            </p>
+
+          {!filtered.length && !loading && (
+            <div className="compact-empty-state">
+              <p>No projects match your current search or filter.</p>
+              {(search || categoryFilter !== "All" || statusFilter !== "All") && (
+                <button
+                  type="button"
+                  className="button ghost compact-btn"
+                  onClick={() => {
+                    setSearch("");
+                    setCategoryFilter("All");
+                    setStatusFilter("All");
+                  }}
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Mobile Cards View (<= 768px) */}
-        <div className="admin-cards-list mobile-cards-list">
-          {items.map((p) => (
-            <article className="admin-mobile-card" key={p._id || p.id}>
-              <div className="admin-card-head">
-                <img
-                  className="admin-card-img"
-                  src={mediaUrl(p.image)}
-                  onError={(e) =>
-                    (e.currentTarget.src = "/assets/projects/web-platform.svg")
-                  }
-                  alt=""
-                />
-                <div className="admin-card-info">
-                  <span className="admin-card-category">{p.category}</span>
-                  <h3 className="admin-card-title">{p.title}</h3>
-                  <div className="admin-card-badges">
-                    <span className={`status ${p.status || "published"}`}>
-                      {p.status || "published"}
-                    </span>
-                    {p.featured && (
-                      <span className="badge-featured">
-                        <Star size={11} fill="currentColor" /> Featured
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              {p.summary && <p className="admin-card-summary">{p.summary}</p>}
-              <div className="admin-card-actions">
-                <button
-                  className="mobile-action-btn edit"
-                  onClick={() => setForm(p)}
-                >
-                  <Pencil size={15} /> <span>Edit</span>
-                </button>
-                <button
-                  className="mobile-action-btn delete"
-                  onClick={() => del(p._id)}
-                >
-                  <Trash2 size={15} /> <span>Delete</span>
-                </button>
-              </div>
-            </article>
-          ))}
-          {!items.length && !loading && (
-            <p className="empty">
-              No database projects found yet. Add your first project.
-            </p>
-          )}
-        </div>
-
-        {/* Responsive Add / Edit Modal */}
+        {/* Compact & Professional Add / Edit Modal */}
         {form && (
-          <div className="modal-backdrop" onClick={() => setForm(null)}>
+          <div className="modal-backdrop" onClick={() => !saving && setForm(null)}>
             <form
-              className="project-form"
+              className="project-form compact-modal-form"
               onSubmit={save}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="project-form-header">
+              {/* Modal Header */}
+              <div className="project-form-header compact-modal-header">
                 <div>
-                  <p className="eyebrow">
-                    {form._id ? "EDIT PROJECT" : "NEW PROJECT"}
-                  </p>
-                  <h2>{form._id ? "Update project" : "Add a project"}</h2>
+                  <p className="eyebrow">{form._id ? "EDIT PROJECT" : "NEW PROJECT"}</p>
+                  <h2>{form._id ? `Edit: ${form.title || "Project"}` : "Add New Project"}</h2>
                 </div>
                 <button
                   type="button"
                   className="close"
                   onClick={() => setForm(null)}
+                  disabled={saving}
                   aria-label="Close modal"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
 
-              <div className="project-form-fields">
-                <label>
-                  <span>Project title *</span>
-                  <input
-                    name="title"
-                    required
-                    defaultValue={form.title || ""}
-                    placeholder="e.g. Modern Web Platform"
-                  />
-                </label>
-
-                <label>
-                  <span>Category *</span>
-                  <input
-                    name="category"
-                    required
-                    defaultValue={form.category || "Web Development"}
-                    placeholder="e.g. Web Development, Mobile Apps"
-                  />
-                </label>
-
-                <label>
-                  <span>Short summary *</span>
-                  <textarea
-                    name="summary"
-                    required
-                    rows={2}
-                    defaultValue={form.summary || ""}
-                    placeholder="Brief one or two line overview"
-                  />
-                </label>
-
-                <label>
-                  <span>Description</span>
-                  <textarea
-                    name="description"
-                    rows={3}
-                    defaultValue={form.description || ""}
-                    placeholder="Full project details"
-                  />
-                </label>
-
-                <label>
-                  <span>YouTube video URL</span>
-                  <input
-                    name="videoUrl"
-                    defaultValue={form.videoUrl || ""}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                  />
-                </label>
-
-                <label>
-                  <span>Key features (comma separated)</span>
-                  <textarea
-                    name="features"
-                    rows={2}
-                    defaultValue={(form.features || []).join(", ")}
-                    placeholder="Attendance, reports, notifications"
-                  />
-                </label>
-
-                <div className="form-row-2">
+              {/* 2-Column Responsive Body */}
+              <div className="compact-modal-body">
+                {/* Column 1: Core Details */}
+                <div className="compact-modal-col">
+                  <div className="col-heading">General Information</div>
                   <label>
-                    <span>Your role</span>
+                    <span className="field-label">Project title *</span>
                     <input
-                      name="role"
-                      defaultValue={form.role || ""}
-                      placeholder="Product design & development"
+                      name="title"
+                      required
+                      defaultValue={form.title || ""}
+                      placeholder="e.g. AI Workflow Assistant"
+                      className="compact-input"
                     />
                   </label>
+
+                  <div className="form-row-2">
+                    <label>
+                      <span className="field-label">Category *</span>
+                      <input
+                        name="category"
+                        required
+                        defaultValue={form.category || "Web Development"}
+                        placeholder="e.g. AI & Automation"
+                        className="compact-input"
+                      />
+                    </label>
+                    <label>
+                      <span className="field-label">Status</span>
+                      <select
+                        name="status"
+                        defaultValue={form.status || "published"}
+                        className="compact-input compact-select"
+                      >
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                      </select>
+                    </label>
+                  </div>
+
                   <label>
-                    <span>Project year</span>
+                    <span className="field-label">Short summary *</span>
+                    <textarea
+                      name="summary"
+                      required
+                      rows={2}
+                      defaultValue={form.summary || ""}
+                      placeholder="Brief one or two line overview for cards and hero"
+                      className="compact-input compact-textarea"
+                    />
+                  </label>
+
+                  <label>
+                    <span className="field-label">Full description</span>
+                    <textarea
+                      name="description"
+                      rows={3}
+                      defaultValue={form.description || ""}
+                      placeholder="Comprehensive project background and achievements..."
+                      className="compact-input compact-textarea"
+                    />
+                  </label>
+
+                  <label>
+                    <span className="field-label">Technologies (comma separated)</span>
                     <input
-                      name="year"
-                      defaultValue={form.year || ""}
-                      placeholder="2025"
+                      name="technologies"
+                      defaultValue={(form.technologies || []).join(", ")}
+                      placeholder="React, Node.js, MongoDB, Tailwind"
+                      className="compact-input"
+                    />
+                  </label>
+
+                  <label>
+                    <span className="field-label">Key features (comma separated)</span>
+                    <textarea
+                      name="features"
+                      rows={2}
+                      defaultValue={(form.features || []).join(", ")}
+                      placeholder="Real-time syncing, AI generation, Export to PDF"
+                      className="compact-input compact-textarea"
                     />
                   </label>
                 </div>
 
-                <label>
-                  <span>Technologies (comma separated)</span>
-                  <input
-                    name="technologies"
-                    defaultValue={(form.technologies || []).join(", ")}
-                    placeholder="React, Node.js, MongoDB"
-                  />
-                </label>
+                {/* Column 2: Media & URLs */}
+                <div className="compact-modal-col">
+                  <div className="col-heading">Media & Showcase Links</div>
 
-                <div className="form-row-2">
                   <label>
-                    <span>Project image URL</span>
+                    <span className="field-label">YouTube / Video URL</span>
+                    <input
+                      name="videoUrl"
+                      defaultValue={form.videoUrl || ""}
+                      placeholder="https://www.youtube.com/shorts/... or watch?v=..."
+                      className="compact-input"
+                    />
+                  </label>
+
+                  <label>
+                    <span className="field-label">Project Image URL</span>
                     <input
                       name="imageUrl"
                       defaultValue={form.image || ""}
-                      placeholder="/assets/projects/web-platform.svg"
+                      onChange={(e) => setPreviewImg(e.target.value)}
+                      placeholder="/assets/projects/web-platform.svg or /uploads/..."
+                      className="compact-input"
                     />
                   </label>
-                  <label>
-                    <span>Or upload image</span>
-                    <input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" />
-                  </label>
-                </div>
 
-                <div className="form-row-2">
                   <label>
-                    <span>Live URL</span>
+                    <span className="field-label">Or upload image file</span>
                     <input
-                      name="liveUrl"
-                      defaultValue={form.liveUrl || ""}
-                      placeholder="https://example.com"
+                      name="image"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                      onChange={handleFileChange}
+                      className="compact-file-input"
                     />
                   </label>
-                  <label>
-                    <span>GitHub URL</span>
-                    <input
-                      name="githubUrl"
-                      defaultValue={form.githubUrl || ""}
-                      placeholder="https://github.com/username/repo"
-                    />
-                  </label>
-                </div>
 
-                <div className="form-checks">
-                  <label className="checkbox-pill">
-                    <input
-                      name="featured"
-                      type="checkbox"
-                      value="true"
-                      defaultChecked={!!form.featured}
-                    />
-                    <span>
-                      <Star size={13} fill="currentColor" /> Featured
-                    </span>
-                  </label>
-                  <label className="checkbox-pill">
-                    <input
-                      name="status"
-                      type="checkbox"
-                      value="published"
-                      defaultChecked={form.status !== "draft"}
-                    />
-                    <span>Published</span>
-                  </label>
+                  {/* Live Media Thumbnail Preview */}
+                  {previewImg && (
+                    <div className="modal-preview-box">
+                      <span className="preview-label">Artwork Preview:</span>
+                      <img
+                        src={mediaUrl(previewImg)}
+                        alt="Preview"
+                        className="modal-preview-img"
+                        onError={(e) => (e.currentTarget.style.display = "none")}
+                      />
+                    </div>
+                  )}
+
+                  <div className="form-row-2">
+                    <label>
+                      <span className="field-label">Live Preview URL</span>
+                      <input
+                        name="liveUrl"
+                        defaultValue={form.liveUrl || ""}
+                        placeholder="https://..."
+                        className="compact-input"
+                      />
+                    </label>
+                    <label>
+                      <span className="field-label">GitHub URL</span>
+                      <input
+                        name="githubUrl"
+                        defaultValue={form.githubUrl || ""}
+                        placeholder="https://github.com/..."
+                        className="compact-input"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="form-row-2">
+                    <label>
+                      <span className="field-label">Your role</span>
+                      <input
+                        name="role"
+                        defaultValue={form.role || ""}
+                        placeholder="Full-Stack Developer"
+                        className="compact-input"
+                      />
+                    </label>
+                    <label>
+                      <span className="field-label">Project year</span>
+                      <input
+                        name="year"
+                        defaultValue={form.year || ""}
+                        placeholder="2026"
+                        className="compact-input"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="compact-checkbox-wrap">
+                    <label className="compact-checkbox-label">
+                      <input
+                        name="featured"
+                        type="checkbox"
+                        value="true"
+                        defaultChecked={!!form.featured}
+                      />
+                      <span>
+                        <Star size={13} fill="currentColor" /> Highlight as Featured Project
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div className="project-form-footer">
+              {/* Modal Footer */}
+              <div className="project-form-footer compact-modal-footer">
                 <button
                   type="button"
-                  className="button ghost cancel-btn"
+                  className="button ghost compact-btn"
                   onClick={() => setForm(null)}
+                  disabled={saving}
                 >
                   Cancel
                 </button>
-                <button type="submit" className="button primary save-btn">
-                  Save project <CheckCircle2 size={16} />
+                <button type="submit" className="button primary compact-btn" disabled={saving}>
+                  {saving ? (
+                    <span>Saving...</span>
+                  ) : (
+                    <>
+                      <span>{form._id ? "Update Project" : "Create Project"}</span>
+                      <CheckCircle2 size={15} />
+                    </>
+                  )}
                 </button>
               </div>
             </form>

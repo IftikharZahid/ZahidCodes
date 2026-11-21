@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import projectRoutes from "./routes/projects.js";
 import chatRoutes from "./routes/chat.js";
+import { seedDatabaseIfEmpty } from "./seedProjects.js";
 
 // Fix for Windows DNS resolution with MongoDB SRV records
 try {
@@ -36,7 +37,10 @@ const port = process.env.PORT || 5000;
 if (process.env.MONGODB_URI) {
   mongoose
     .connect(process.env.MONGODB_URI, { dbName: "zahidcodes_portfolio" })
-    .then(() => console.log("MongoDB connected successfully to cluster0"))
+    .then(async () => {
+      console.log("MongoDB connected successfully to cluster0");
+      await seedDatabaseIfEmpty();
+    })
     .catch((e) => {
       console.error("MongoDB connection error:", e.message);
       if (e.message.includes("SSL alert number 80") || e.message.includes("tlsv1 alert internal error")) {
