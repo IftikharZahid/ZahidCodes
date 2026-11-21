@@ -65,12 +65,14 @@ function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const [lightMode, setLightMode] = useState(() => {
-    const saved = localStorage.getItem("zc-theme");
-    return saved === "light";
+    const saved = sessionStorage.getItem("zc-theme") || localStorage.getItem("zc-theme");
+    if (saved === "dark") return false;
+    return true; // Default is light mode (white)
   });
 
   useEffect(() => {
     document.documentElement.dataset.theme = lightMode ? "light" : "dark";
+    sessionStorage.setItem("zc-theme", lightMode ? "light" : "dark");
     localStorage.setItem("zc-theme", lightMode ? "light" : "dark");
   }, [lightMode]);
 
@@ -88,16 +90,119 @@ function Header() {
   };
 
   return (
-    <header className="nav">
+    <header className="header-wrapper">
+      <div className="nav">
+        <Link
+          to="/"
+          className="brand"
+          onClick={() => {
+            setOpen(false);
+            if (location.pathname === "/") {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              window.history.replaceState(null, "", "/");
+            }
+          }}
+        >
+          <img src="/assets/zahidcodes-logo.png" alt="ZahidCodes" />
+          <span>
+            Zahid<span className="cyan">Codes</span>
+            <small>DECODING THE FUTURE</small>
+          </span>
+        </Link>
+        <div className="nav-actions-mobile">
+          <button
+            type="button"
+            className="mobile-theme-toggle"
+            onClick={() => setLightMode((value) => !value)}
+            aria-label={lightMode ? "Switch to dark mode" : "Switch to light mode"}
+            title={lightMode ? "Switch to dark mode" : "Switch to light mode"}
+          >
+            {lightMode ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
+          <button
+            className="mobile-menu"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle navigation menu"
+          >
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+        <nav className={open ? "navlinks show" : "navlinks"}>
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(false);
+              if (location.pathname === "/") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                window.history.replaceState(null, "", "/");
+              } else {
+                navigate("/");
+              }
+            }}
+          >
+            Home
+          </a>
+          <a
+            href="/#work"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToSection("work");
+            }}
+          >
+            Projects
+          </a>
+          <a
+            href="/#services"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToSection("services");
+            }}
+          >
+            What I do
+          </a>
+          <a
+            href="/#about"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToSection("about");
+            }}
+          >
+            About
+          </a>
+          <button
+            type="button"
+            className="theme-toggle desktop-theme-toggle"
+            onClick={() => setLightMode((value) => !value)}
+            aria-label={lightMode ? "Switch to dark mode" : "Switch to light mode"}
+            title={lightMode ? "Switch to dark mode" : "Switch to light mode"}
+          >
+            {lightMode ? <Moon size={16} /> : <Sun size={16} />}
+            <span>{lightMode ? "Dark mode" : "Light mode"}</span>
+          </button>
+          <a
+            href="/#contact"
+            className="nav-cta"
+            onClick={(e) => {
+              e.preventDefault();
+              scrollToSection("contact");
+            }}
+          >
+            Let's talk <ArrowUpRight size={16} />
+          </a>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="footer">
       <Link
         to="/"
         className="brand"
-        onClick={() => {
-          setOpen(false);
-          if (location.pathname === "/") {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }
-        }}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
         <img src="/assets/zahidcodes-logo.png" alt="ZahidCodes" />
         <span>
@@ -105,65 +210,58 @@ function Header() {
           <small>DECODING THE FUTURE</small>
         </span>
       </Link>
-      <button
-        className="mobile-menu"
-        onClick={() => setOpen(!open)}
-        aria-label="Toggle navigation menu"
-      >
-        {open ? <X /> : <Menu />}
-      </button>
-      <nav className={open ? "navlinks show" : "navlinks"}>
+      <span>
+        © {new Date().getFullYear()} ZahidCodes. Built with purpose.
+      </span>
+      <div className="footer-links">
         <a
-          href="/#work"
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToSection("work");
-          }}
+          href="https://wa.me/+923007971374"
+          target="_blank"
+          rel="noreferrer"
+          title="WhatsApp"
+          aria-label="WhatsApp"
         >
-          Projects
+          <WhatsAppIcon size={16} />
         </a>
         <a
-          href="/#services"
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToSection("services");
-          }}
+          href="https://facebook.com/zahidcodes"
+          target="_blank"
+          rel="noreferrer"
+          title="Facebook"
+          aria-label="Facebook"
         >
-          What I do
+          <Facebook size={16} />
         </a>
         <a
-          href="/#about"
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToSection("about");
-          }}
+          href="https://instagram.com/iftikharxahid"
+          target="_blank"
+          rel="noreferrer"
+          title="Instagram"
+          aria-label="Instagram"
         >
-          About
+          <Instagram size={16} />
         </a>
-        <button
-          type="button"
-          className="theme-toggle"
-          onClick={() => setLightMode((value) => !value)}
-          aria-label={lightMode ? "Switch to dark mode" : "Switch to light mode"}
-          title={lightMode ? "Switch to dark mode" : "Switch to light mode"}
-        >
-          {lightMode ? <Moon size={16} /> : <Sun size={16} />}
-          <span>{lightMode ? "Dark mode" : "Light mode"}</span>
-        </button>
         <a
-          href="/#contact"
-          className="nav-cta"
-          onClick={(e) => {
-            e.preventDefault();
-            scrollToSection("contact");
-          }}
+          href="https://github.com/IftikharZahid"
+          target="_blank"
+          rel="noreferrer"
+          title="GitHub"
+          aria-label="GitHub"
         >
-          Let's talk <ArrowUpRight size={16} />
+          <Github size={16} />
         </a>
-      </nav>
-    </header>
+        <a
+          href="mailto:XahidCodes@gmail.com"
+          title="Email"
+          aria-label="Email"
+        >
+          <Mail size={16} />
+        </a>
+      </div>
+    </footer>
   );
 }
+
 function ProjectCard({ p, onOpen }) {
   return (
     <article
@@ -353,17 +451,35 @@ function ProjectDetail() {
     };
   }, [slug]);
 
+  useEffect(() => {
+    if (project?.title) {
+      document.title = `${project.title} — ZahidCodes`;
+    }
+  }, [project]);
+
   if (loading) {
-    return <div className="project-detail-state">Loading project details…</div>;
+    return (
+      <div className="project-detail-page">
+        <Header />
+        <div className="project-detail-state">Loading project details…</div>
+        <Footer />
+        <AIAssistant />
+      </div>
+    );
   }
   if (!project) {
     return (
-      <div className="project-detail-state">
-        <p className="eyebrow">PROJECT NOT FOUND</p>
-        <h1>That project is unavailable.</h1>
-        <button className="button primary" onClick={() => navigate("/")}>
-          Back to projects <ArrowUpRight size={16} />
-        </button>
+      <div className="project-detail-page">
+        <Header />
+        <div className="project-detail-state">
+          <p className="eyebrow">PROJECT NOT FOUND</p>
+          <h1>That project is unavailable.</h1>
+          <button className="button primary" onClick={() => navigate("/")}>
+            Back to projects <ArrowUpRight size={16} />
+          </button>
+        </div>
+        <Footer />
+        <AIAssistant />
       </div>
     );
   }
@@ -481,6 +597,8 @@ function ProjectDetail() {
           </aside>
         </div>
       </main>
+      <Footer />
+      <AIAssistant />
     </div>
   );
 }
@@ -491,6 +609,10 @@ function Home() {
     [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    document.title = "Iftikhar Zahid — Full-Stack Developer & Tech Builder | ZahidCodes";
+  }, []);
 
   useEffect(() => {
     if (location.hash) {
@@ -813,68 +935,7 @@ function Home() {
           </div>
         </section>
       </main>
-      <footer className="footer">
-        <Link
-          to="/"
-          className="brand"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        >
-          <img src="/assets/zahidcodes-logo.png" alt="ZahidCodes" />
-          <span>
-            Zahid<span className="cyan">Codes</span>
-            <small>DECODING THE FUTURE</small>
-          </span>
-        </Link>
-        <span>
-          © {new Date().getFullYear()} ZahidCodes. Built with purpose.
-        </span>
-        <div className="footer-links">
-          <a
-            href="https://wa.me/+923007971374"
-            target="_blank"
-            rel="noreferrer"
-            title="WhatsApp"
-            aria-label="WhatsApp"
-          >
-            <WhatsAppIcon size={16} />
-          </a>
-          <a
-            href="https://facebook.com/zahidcodes"
-            target="_blank"
-            rel="noreferrer"
-            title="Facebook"
-            aria-label="Facebook"
-          >
-            <Facebook size={16} />
-          </a>
-          <a
-            href="https://instagram.com/iftikharxahid"
-            target="_blank"
-            rel="noreferrer"
-            title="Instagram"
-            aria-label="Instagram"
-          >
-            <Instagram size={16} />
-          </a>
-          <a
-            href="https://github.com/IftikharZahid"
-            target="_blank"
-            rel="noreferrer"
-            title="GitHub"
-            aria-label="GitHub"
-          >
-            <Github size={16} />
-          </a>
-          <a
-            href="mailto:XahidCodes@gmail.com"
-            title="Email"
-            aria-label="Email"
-          >
-            <Mail size={16} />
-          </a>
-        </div>
-      </footer>
-
+      <Footer />
       <AIAssistant />
     </>
   );
@@ -956,7 +1017,110 @@ function AIAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [position, setPosition] = useState(null); // null = default CSS position
+  const [isDragging, setIsDragging] = useState(false);
+
+  const triggerRef = React.useRef(null);
+  const dragInfoRef = React.useRef(null);
   const messagesEndRef = React.useRef(null);
+
+  const handlePointerDown = (e) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    const el = triggerRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    dragInfoRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialLeft: rect.left,
+      initialTop: rect.top,
+      hasMoved: false,
+      pointerId: e.pointerId,
+    };
+
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePointerMove = (e) => {
+    if (!dragInfoRef.current || dragInfoRef.current.pointerId !== e.pointerId) return;
+
+    const dx = e.clientX - dragInfoRef.current.startX;
+    const dy = e.clientY - dragInfoRef.current.startY;
+
+    if (!dragInfoRef.current.hasMoved && Math.hypot(dx, dy) > 4) {
+      dragInfoRef.current.hasMoved = true;
+      setIsDragging(true);
+    }
+
+    if (dragInfoRef.current.hasMoved) {
+      const el = triggerRef.current;
+      const width = el?.offsetWidth || 110;
+      const height = el?.offsetHeight || 44;
+
+      const minLeft = 10;
+      const maxLeft = Math.max(10, window.innerWidth - width - 10);
+      const minTop = 10;
+      const maxTop = Math.max(10, window.innerHeight - height - 10);
+
+      let newLeft = dragInfoRef.current.initialLeft + dx;
+      let newTop = dragInfoRef.current.initialTop + dy;
+
+      newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
+      newTop = Math.max(minTop, Math.min(newTop, maxTop));
+
+      setPosition({ x: newLeft, y: newTop });
+    }
+  };
+
+  const handlePointerUp = (e) => {
+    if (!dragInfoRef.current || dragInfoRef.current.pointerId !== e.pointerId) return;
+
+    const hasMoved = dragInfoRef.current.hasMoved;
+
+    try {
+      triggerRef.current?.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    dragInfoRef.current = null;
+    setIsDragging(false);
+
+    // If it was just a tap/click without dragging, toggle the assistant
+    if (!hasMoved) {
+      setOpen((prev) => !prev);
+    }
+  };
+
+  const handlePointerCancel = (e) => {
+    if (dragInfoRef.current && dragInfoRef.current.pointerId === e.pointerId) {
+      try {
+        triggerRef.current?.releasePointerCapture(e.pointerId);
+      } catch {}
+      dragInfoRef.current = null;
+      setIsDragging(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition((pos) => {
+        if (!pos) return null;
+        const el = triggerRef.current;
+        const width = el?.offsetWidth || 110;
+        const height = el?.offsetHeight || 44;
+        const maxLeft = Math.max(10, window.innerWidth - width - 10);
+        const maxTop = Math.max(10, window.innerHeight - height - 10);
+        return {
+          x: Math.max(10, Math.min(pos.x, maxLeft)),
+          y: Math.max(10, Math.min(pos.y, maxTop)),
+        };
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const quickPrompts = [
     "💻 Core skills & tech stack",
@@ -1061,14 +1225,30 @@ function AIAssistant() {
         />
       )}
 
-      {/* Floating Trigger Button - STRICTLY "Ask AI" */}
-      <div className={`ai-floating-wrap ${open ? "is-open" : ""}`}>
+      {/* Floating Trigger Button - Draggable & Clickable */}
+      <div
+        className={`ai-floating-wrap ${open ? "is-open" : ""} ${isDragging ? "is-dragging" : ""}`}
+        style={
+          position
+            ? {
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+                right: "auto",
+                bottom: "auto",
+              }
+            : undefined
+        }
+      >
         <button
+          ref={triggerRef}
           type="button"
-          className={`ai-trigger-btn ${open ? "active" : ""}`}
-          onClick={() => setOpen(!open)}
-          aria-label={open ? "Close AI Assistant" : "Open AI Assistant"}
-          title="Chat with ZahidCodes AI"
+          className={`ai-trigger-btn ${open ? "active" : ""} ${isDragging ? "dragging" : ""}`}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
+          aria-label={open ? "Close AI Assistant" : "Open AI Assistant (Drag to move)"}
+          title={open ? "Close chat" : "Chat with ZahidCodes AI (Drag anywhere to move)"}
         >
           <span className="ai-pulse-dot" />
           {open ? <X size={18} /> : <Bot size={18} />}

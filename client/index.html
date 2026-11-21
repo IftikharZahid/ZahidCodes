@@ -1,18 +1,123 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <meta name="theme-color" content="#080d1c" />
-    <meta name="description"
-        content="Explore software products, mobile apps and digital experiences built by ZahidCodes." />
-    <title>ZahidCodes — Digital Products & Projects</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <script>
+    (function () {
+      try {
+        var saved = sessionStorage.getItem("zc-theme") || localStorage.getItem("zc-theme");
+        if (saved === "dark") {
+          document.documentElement.dataset.theme = "dark";
+        } else {
+          document.documentElement.dataset.theme = "light";
+        }
+      } catch (e) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+
+  <!-- Primary Meta Tags -->
+  <title>Iftikhar Zahid — Full-Stack Developer & Tech Builder | ZahidCodes</title>
+  <meta name="title" content="Iftikhar Zahid — Full-Stack Developer & Tech Builder | ZahidCodes" />
+  <meta name="description"
+    content="Explore software products, mobile apps and digital experiences built by Iftikhar Zahid. Turning ideas into digital experiences with React, Node.js, React Native, and AI automation." />
+  <meta name="keywords"
+    content="Iftikhar Zahid, ZahidCodes, Full-Stack Developer, React Developer, React Native, Expo, Mobile App Developer, Node.js, Pakistan Software Engineer, Portfolio, The Seeks Academy, AI Automation, Web Development" />
+  <meta name="author" content="Iftikhar Zahid" />
+  <meta name="creator" content="Iftikhar Zahid" />
+  <meta name="publisher" content="ZahidCodes" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <link rel="canonical" href="https://zahidcodes.tech/" />
+
+  <!-- Theme & Mobile App Styling -->
+  <meta name="theme-color" content="#080d1c" />
+  <meta name="msapplication-TileColor" content="#080d1c" />
+  <meta name="application-name" content="ZahidCodes" />
+  <meta name="apple-mobile-web-app-title" content="ZahidCodes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Favicons (Iftikhar Zahid Profile Photo) -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/iftikhar-zahid.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/iftikhar-zahid.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+  <!-- Open Graph / Facebook / WhatsApp / LinkedIn / Telegram -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://zahidcodes.tech/" />
+  <meta property="og:site_name" content="ZahidCodes" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:title" content="Iftikhar Zahid — Full-Stack Developer & Tech Builder | ZahidCodes" />
+  <meta property="og:description"
+    content="Explore software products, mobile apps and digital experiences built by Iftikhar Zahid. Turning ideas into digital experiences with React, Node.js, React Native, and AI automation." />
+  <meta property="og:image" content="https://zahidcodes.tech/assets/iftikhar-zahid.png" />
+  <meta property="og:image:secure_url" content="https://zahidcodes.tech/assets/iftikhar-zahid.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1000" />
+  <meta property="og:image:height" content="1000" />
+  <meta property="og:image:alt" content="Iftikhar Zahid — Full-Stack Developer & Digital Product Builder" />
+
+  <!-- Twitter Card / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://zahidcodes.tech/" />
+  <meta name="twitter:title" content="Iftikhar Zahid — Full-Stack Developer & Tech Builder | ZahidCodes" />
+  <meta name="twitter:description"
+    content="Explore software products, mobile apps and digital experiences built by Iftikhar Zahid. Turning ideas into digital experiences with React, Node.js, React Native, and AI automation." />
+  <meta name="twitter:image" content="https://zahidcodes.tech/assets/iftikhar-zahid.png" />
+  <meta name="twitter:image:alt" content="Iftikhar Zahid — Full-Stack Developer & Digital Product Builder" />
+  <meta name="twitter:site" content="@ZahidCodes" />
+  <meta name="twitter:creator" content="@IftikharZahid" />
+
+  <!-- Schema.org JSON-LD Structured Data for Google Rich Snippets & Knowledge Graph -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://zahidcodes.tech/#person",
+        "name": "Iftikhar Zahid",
+        "url": "https://zahidcodes.tech",
+        "image": "https://zahidcodes.tech/assets/iftikhar-zahid.png",
+        "jobTitle": "Full-Stack Software Developer & CS Educator",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "ZahidCodes"
+        },
+        "description": "Independent software developer and digital product builder specializing in Web Platforms, React Native mobile apps, and AI solutions.",
+        "sameAs": [
+          "https://github.com/IftikharZahid",
+          "https://facebook.com/zahidcodes",
+          "https://facebook.com/iftikharxahid",
+          "https://instagram.com/iftikharxahid",
+          "https://wa.me/+923007971374"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://zahidcodes.tech/#website",
+        "url": "https://zahidcodes.tech",
+        "name": "ZahidCodes",
+        "description": "Turning ideas into digital experiences — Software, Mobile Apps & AI",
+        "publisher": {
+          "@id": "https://zahidcodes.tech/#person"
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 
 </html>
