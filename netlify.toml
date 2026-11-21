@@ -1,0 +1,16 @@
+# The deployable frontend is the Vite app in client/. Building from that
+# directory makes Netlify install client/package.json dependencies (including
+# Vite) before running the build, and publishes client/dist.
+# The command installs dependencies itself (including devDependencies such as
+# Vite) so the build works even when no automatic install step runs.
+[build]
+  base = "client"
+  command = "npm ci --include=dev && npm run build"
+  publish = "dist"
+
+# Single-page app: let React Router handle deep links like /admin/login
+# and /projects/:id instead of returning a 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
